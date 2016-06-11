@@ -1,7 +1,11 @@
 #pragma once
 #include <stdio.h>
+#include "FixedSizeQueue.h"
+#include "MemoryMap.h"
 
 #define  MAX_BUFFER_SIZE 250
+#define  MAX_SEND_BUFFER_SIZE 15
+#define  MAX_SEND_QUEUE_DEPTH 15
 #define  PACKET_TIMEOUT_DEFINED 2000
 #define  MAX_ZONE_COUNT 31
 
@@ -9,16 +13,22 @@ class PowerMaxAlarm;
 
 enum PmaxCommand
 {
-    Pmax_ACK = 0,
-    Pmax_GETEVENTLOG = 2,
-    Pmax_DISARM = 3,
-    Pmax_ARMHOME = 4,
-    Pmax_ARMAWAY = 5,
-    Pmax_ARMAWAY_INSTANT = 6,
-    Pmax_REQSTATUS = 7,
-    Pmax_ENROLLREPLY = 10,
-    Pmax_REENROLL = 11,
-    Pmax_GETVERSION = 12
+    Pmax_ACK,
+    Pmax_GETEVENTLOG,
+    Pmax_DISARM,
+    Pmax_ARMHOME,
+    Pmax_ARMAWAY,
+    Pmax_ARMAWAY_INSTANT,
+    Pmax_REQSTATUS,
+    Pmax_ENROLLREPLY,
+    Pmax_INIT,
+    Pmax_RESTORE,
+    Pmax_DL_START,
+    Pmax_DL_GET,
+    Pmax_DL_EXIT, //stop download mode
+    Pmax_DL_PANELFW,
+    Pmax_DL_SERIAL,
+    Pmax_DL_ZONESTR
 };
 
 enum ZoneEvent
@@ -64,6 +74,12 @@ enum SystemStatus
     SS_Not_Ready = 0x0D
 };
 
+enum PmAckType
+{
+    ACK_1,
+    ACK_2
+};
+
 //this abstract class is used by DumpToJson API
 //it allows to redirect JSON to file, console, www output
 class IOutput
@@ -83,11 +99,16 @@ public:
     void write(const char* str);
 };
 
-struct PlinkBuffer {
-    unsigned char buffer[MAX_BUFFER_SIZE];
-    unsigned char size;
+struct PlinkCommand {
+    unsigned char buffer[MAX_SEND_BUFFER_SIZE];
+    int size;
     const char* description;
     void (*action)(PowerMaxAlarm* pm, const struct PlinkBuffer *);
+};
+
+struct PlinkBuffer {
+    unsigned char buffer[MAX_BUFFER_SIZE];
+    int size;
 };
 
 struct ZoneState {
@@ -111,6 +132,15 @@ struct Zone {
     void DumpToJson(IOutput* outputStream);
 };
 
+struct PmQueueItem
+{
+    unsigned char buffer[MAX_SEND_BUFFER_SIZE];
+    int bufferLen;
+
+    const char* description;
+    unsigned char expectedRepply;
+    const char* options;
+};
 
 class PowerMaxAlarm
 {
@@ -137,8 +167,25 @@ class PowerMaxAlarm
     //used to detect when PowerMax stops talking to us, that will trigger re-establish comms message
     time_t lastIoTime;
 
+    FixedSizeQueue<PmQueueItem, MAX_SEND_QUEUE_DEPTH> m_sendQueue;
+
+    bool m_bEnrolCompleted;
+    bool m_bDownloadMode;
+    int m_iPanelType;
+    int m_iModelType;
+    bool m_bPowerMaster;
+    PmAckType m_ackTypeForLastMsg;
+
+    //used to store data downloaded from PM
+    MemoryMap m_mapMain;
+    MemoryMap m_mapExtended;
+
+    PlinkCommand m_lastSentCommand;
 public:
+
     void Init();
+    void SendNextCommand();
+    void clearQueue(){ m_sendQueue.clear(); }
     
     bool sendCommand(PmaxCommand cmd);
     void handlePacket(PlinkBuffer  * commandBuffer);
@@ -151,7 +198,7 @@ public:
     void DumpToJson(IOutput* outputStream);
 
 private:
-    static void addPin(unsigned char* bufferToSend);
+    static void addPin(unsigned char* bufferToSend, int pos = 4);
 
     bool isFlagSet(unsigned char id) const { return (flags & 1<<id) != 0; }
     bool isAlarmEvent() const{  return isFlagSet(7); }
@@ -159,8 +206,20 @@ private:
 
     void Format_SystemStatus(char* tpbuff, int buffSize);
 
-    static bool sendBuffer(const unsigned char * data, int bufferSize);
-    static void sendBuffer(struct PlinkBuffer * Buff);
+    //buffer is coppied, description and options need to be in pernament addressess (not something from stack)
+    bool QueueCommand(const unsigned char* buffer, int bufferLen, const char* description, unsigned char expectedRepply = 0x00, const char* options = NULL);
+    void PowerLinkEnrolled();
+    void ProcessSettings();
+
+    int ReadMemoryMap(const unsigned char* msg, unsigned char* buffOut, int buffOutSize);
+    void WriteMemoryMap(int iPage, int iIndex, const unsigned char* sData, int sDataLen);
+
+    bool sendBuffer(const unsigned char * data, int bufferSize);
+    void sendBuffer(struct PlinkBuffer * Buff);
+    static PmAckType calculateAckType(const unsigned char* deformattedBuffer, int bufferLen);
+
+    void StartKeepAliveTimer();
+    void StopKeepAliveTimer();
 
 public:
     static void PmaxStatusUpdateZoneBat(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
@@ -172,8 +231,13 @@ public:
     static void PmaxEventLog(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
     static void PmaxAccessDenied(PowerMaxAlarm* pm, const PlinkBuffer  * Bufff);
     static void PmaxAck(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxPing(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    static void PmaxTimeOut(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    static void PmaxStop(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
     static void PmaxEnroll(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    static void PmaxPing(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    static void PmaxPanelInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    static void PmaxDownloadInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    static void PmaxDownloadSettings(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
 };
 
 /* This section specifies OS specific functions. */

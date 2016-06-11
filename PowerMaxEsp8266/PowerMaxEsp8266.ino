@@ -34,8 +34,8 @@ const char * const cfg_zones[] = {  "system",  "front door", "hall", "living roo
 #define ALARM_USER_PIN 0x1234; //IZIZTODO
 
 //Specify your WIFI settings:
-#define WIFI_SSID "MyNet"
-#define WIFI_PASS "MyPassword"
+#define WIFI_SSID "IreksNetUnit8"
+#define WIFI_PASS "??"
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -218,6 +218,30 @@ void handleNewTelnetClients()
   }
 }
 
+void runDirectRelayLoop()
+{
+  while(telnetClient.connected())
+  { 
+    bool wait = true;
+    if(Serial.available())
+    {
+      telnetClient.write( Serial.read() );
+      wait = false;
+    }
+
+    if(telnetClient.available())
+    {
+      Serial.write( telnetClient.read() );
+      wait = false;
+    }
+
+    if(wait)
+    {
+      delay(100);
+    }
+  } 
+}
+
 void handleTelnetRequests(PowerMaxAlarm* pm) {
   char c; 
   if ( telnetClient.connected() && telnetClient.available() )  {
@@ -236,6 +260,10 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
       DEBUG(LOG_NOTICE,"Arming away");
       pm->sendCommand(Pmax_ARMAWAY);
     }
+    else if ( c == 'D' ) {
+      DEBUG(LOG_NO_FILTER,"Direct relay enabled, disconnect to stop...");
+      runDirectRelayLoop();
+    }
 #endif
  
     if ( c == 'g' ) {
@@ -243,12 +271,12 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
       pm->sendCommand(Pmax_GETEVENTLOG);
     }
     else if ( c == 't' ) {
-      DEBUG(LOG_NOTICE,"try re-enroll");
-      pm->sendCommand(Pmax_REENROLL);
+      DEBUG(LOG_NOTICE,"Restore comms");
+      pm->sendCommand(Pmax_RESTORE);
     }
     else if ( c == 'v' ) {
       DEBUG(LOG_NOTICE,"getting versions string");
-      pm->sendCommand(Pmax_GETVERSION);
+     //IZIZTODO pm->sendCommand(Pmax_GETVERSION);
     }
     else if ( c == 'r' ) {
       DEBUG(LOG_NOTICE,"Request Status Update");
@@ -280,6 +308,7 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
         DEBUG(LOG_NO_FILTER,"\t h - Arm Home");
         DEBUG(LOG_NO_FILTER,"\t d - Disarm");
         DEBUG(LOG_NO_FILTER,"\t a - Arm Away");
+        DEBUG(LOG_NO_FILTER,"\t D - Direct mode (relay all bytes from client to PMC and back with no processing, close connection to exit");  
 #endif        
         DEBUG(LOG_NO_FILTER,"\t g - Get Event Log");
         DEBUG(LOG_NO_FILTER,"\t t - Re-Enroll");
@@ -395,7 +424,7 @@ void loop(void){
       //pm.Init() should enroll, but sometimes this fails, this is another attempt to do it if Init() fails. delay is added not to do it too frequently in case of problems
       delay(1000);
       DEBUG(LOG_WARNING,"No enroll information, trying to re-enroll");
-      pm.sendCommand(Pmax_REENROLL);      
+      pm.sendCommand(Pmax_RESTORE);      
     }
   }
   else if(pm.getSecondsFromLastComm() > 120)
@@ -403,7 +432,7 @@ void loop(void){
       //this should not happen (no comms), to re-establish we re-enroll
       delay(1000);
       DEBUG(LOG_WARNING,"Communication failure - trying to re-enroll");
-      pm.sendCommand(Pmax_REENROLL);
+      pm.sendCommand(Pmax_RESTORE);
   }  
 
 #ifdef PM_ENABLE_TELNET_ACCESS

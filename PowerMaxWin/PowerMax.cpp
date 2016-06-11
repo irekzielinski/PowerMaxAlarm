@@ -9,8 +9,9 @@
 #include <conio.h>
 #include "pmax.h"
 
+void LogBuffer(const char* prefix, const unsigned char* buffer, int bufferLen);
 
-void serialHandler(PowerMaxAlarm* pm) {
+bool serialHandler(PowerMaxAlarm* pm) {
     
     PlinkBuffer commandBuffer ;
     memset(&commandBuffer, 0, sizeof(commandBuffer));
@@ -31,9 +32,10 @@ void serialHandler(PowerMaxAlarm* pm) {
 					GetLocalTime(&time);
 					DEBUG(LOG_INFO,"--- new packet %d:%02d:%02d ----", time.wHour, time.wMinute, time.wSecond);
 
+                    LogBuffer("PM", (const unsigned char*)commandBuffer.buffer, commandBuffer.size);
 					pm->handlePacket(&commandBuffer);
 					commandBuffer.size = 0;
-					break;
+					return true;
 				}
 			}
 		}
@@ -45,8 +47,12 @@ void serialHandler(PowerMaxAlarm* pm) {
 	{
 		//this will be an invalid packet:
 		DEBUG(LOG_WARNING,"Passing invalid packet to packetManager");
+        LogBuffer("P?", (const unsigned char*)commandBuffer.buffer, commandBuffer.size);
 		pm->handlePacket(&commandBuffer);
+        return true;
 	}
+
+    return false;
 }
 /////////////////////////////////////////
 
@@ -77,11 +83,16 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
     }
     else if ( c == 't' ) {
       DEBUG(LOG_NOTICE,"try re-enroll");
-      pm->sendCommand(Pmax_REENROLL);
+      pm->sendCommand(Pmax_RESTORE);
     }
     else if ( c == 'v' ) {
       DEBUG(LOG_NOTICE,"getting versions string");
-      pm->sendCommand(Pmax_GETVERSION);
+      pm->sendCommand(Pmax_DL_START);
+      //pm->sendCommand(Pmax_GETVERSION); //IZIZTODO
+    }
+    else if ( c == 'V' ) {
+      pm->sendCommand(Pmax_DL_EXIT);
+      //pm->sendCommand(Pmax_GETVERSION); //IZIZTODO
     }
     else if ( c == 'r' ) {
       DEBUG(LOG_NOTICE,"Request Status Update");
@@ -107,7 +118,6 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
   }
 }
 
-
 int _tmain(int argc, _TCHAR* argv[])
 {
     if(os_serialPortInit("COM3") == false)
@@ -118,17 +128,30 @@ int _tmain(int argc, _TCHAR* argv[])
     PowerMaxAlarm pm;
     pm.Init();
 
+
 	log_console_setlogmask(LOG_INFO);
 
+    DWORD dwLastMsg = 0;
     while (true) {
         KeyPressHandling(&pm);
-        serialHandler(&pm);
+        
+        if(serialHandler(&pm) == true)
+        {
+            dwLastMsg = GetTickCount();
+        }
+        
+        if(GetTickCount() - dwLastMsg > 1000)
+        {
+            pm.SendNextCommand();
+        }
+
+
 		os_usleep(os_cfg_getPacketTimeout());
 
-        if(pm.getSecondsFromLastComm() > 120)
+        /*if(pm.getSecondsFromLastComm() > 120)
         {
-            pm.sendCommand(Pmax_REENROLL);
-        }
+            pm.sendCommand(Pmax_RESTORE);
+        }*/
     }  
 
     os_serialPortClose();
