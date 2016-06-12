@@ -29,10 +29,6 @@ IPAddress PM_LAN_BROADCAST_IP(224, 192, 32, 12);
 const char * const cfg_zones[] = {  "system",  "front door", "hall", "living room",  "kitchen", 
                                     "study",  "upstairs", "conservatory", "garage", "back door", "garage2"};
 
-//Specify Pin for your PowerMax alarm
-//If your pin is 1234, you need to return 0x1234 (this is strange, as 0x makes it hex, but the only way it works)
-#define ALARM_USER_PIN 0x1234; //IZIZTODO
-
 //Specify your WIFI settings:
 #define WIFI_SSID "IreksNetUnit8"
 #define WIFI_PASS "??"
@@ -85,7 +81,7 @@ void handleRoot() {
   val -= minutes*60;
 
   char szTmp[PRINTF_BUF];
-  sprintf(szTmp, "hello from esp8266: Uptime: %02d:%02d:%02d.%02d", (int)days, (int)hours, (int)minutes, (int)val);  
+  sprintf(szTmp, "hello from esp8266: Uptime: %02d:%02d:%02d.%02d, free heap: %u", (int)days, (int)hours, (int)minutes, (int)val, ESP.getFreeHeap());  
   server.send(200, "text/plain", szTmp);
 }
 
@@ -223,10 +219,27 @@ void runDirectRelayLoop()
   while(telnetClient.connected())
   { 
     bool wait = true;
-    if(Serial.available())
+    
+    //we want to read/write in bulk as it's much faster than read one byte -> write one byte (this is known to create problems with PowerMax)
+    unsigned char buffer[256];
+    int readCnt = 0;
+    while(readCnt < 256)
     {
-      telnetClient.write( Serial.read() );
-      wait = false;
+      if(Serial.available())
+      {
+        buffer[readCnt] = Serial.read();
+        readCnt++;
+        wait = false;
+      }
+      else
+      {
+        break;
+      }
+    }
+    
+    if(readCnt > 0)
+    {
+      telnetClient.write_P( (char*)buffer, readCnt );
     }
 
     if(telnetClient.available())
@@ -237,7 +250,7 @@ void runDirectRelayLoop()
 
     if(wait)
     {
-      delay(100);
+      delay(10);
     }
   } 
 }
@@ -275,8 +288,8 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
       pm->sendCommand(Pmax_RESTORE);
     }
     else if ( c == 'v' ) {
-      DEBUG(LOG_NOTICE,"getting versions string");
-     //IZIZTODO pm->sendCommand(Pmax_GETVERSION);
+      DEBUG(LOG_NOTICE,"Exit Download mode");
+      pm->sendCommand(Pmax_DL_EXIT);
     }
     else if ( c == 'r' ) {
       DEBUG(LOG_NOTICE,"Request Status Update");
@@ -290,6 +303,10 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
         DEBUG(LOG_NOTICE,"Exiting...");
         telnetClient.stop();
     }    
+    else if( c == 'C' ) {
+      DEBUG(LOG_NOTICE,"Reseting...");
+      ESP.reset();
+    }    
     else if ( c == 'p' ) {
       telnetDbgLevel = LOG_DEBUG;
       DEBUG(LOG_NOTICE,"Debug Logs enabled type 'P' (capital) to disable");
@@ -298,10 +315,14 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
       telnetDbgLevel = LOG_NO_FILTER;
       DEBUG(LOG_NO_FILTER,"Debug Logs disabled");
     }       
+    else if ( c == 'H' ) {
+      DEBUG(LOG_NO_FILTER,"Free Heap: %u", ESP.getFreeHeap());
+    }  
     else if ( c == '?' )
     {
         DEBUG(LOG_NO_FILTER,"Allowed commands:");
         DEBUG(LOG_NO_FILTER,"\t c - exit");
+        DEBUG(LOG_NO_FILTER,"\t C - reset device");        
         DEBUG(LOG_NO_FILTER,"\t p - output debug messages");
         DEBUG(LOG_NO_FILTER,"\t P - stop outputing debug messages");
 #ifdef PM_ALLOW_CONTROL        
@@ -311,10 +332,13 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
         DEBUG(LOG_NO_FILTER,"\t D - Direct mode (relay all bytes from client to PMC and back with no processing, close connection to exit");  
 #endif        
         DEBUG(LOG_NO_FILTER,"\t g - Get Event Log");
-        DEBUG(LOG_NO_FILTER,"\t t - Re-Enroll");
-        DEBUG(LOG_NO_FILTER,"\t v - Get Version String");
+        DEBUG(LOG_NO_FILTER,"\t t - Restore Comms");
+        DEBUG(LOG_NO_FILTER,"\t v - Exit download mode");
         DEBUG(LOG_NO_FILTER,"\t r - Request Status Update");
         DEBUG(LOG_NO_FILTER,"\t j - Dump Application Status to JSON");  
+        DEBUG(LOG_NO_FILTER,"\t H - Get free heap");  
+
+        
     }
   }
 }
@@ -417,23 +441,16 @@ void loop(void){
 
   server.handleClient();
 
-  if(serialHandler(&pm) == false)
+  static unsigned long lastMsg = 0;
+  if(serialHandler(&pm) == true)
   {
-    if(pm.getEnrolledZoneCnt() == 0)
-    {
-      //pm.Init() should enroll, but sometimes this fails, this is another attempt to do it if Init() fails. delay is added not to do it too frequently in case of problems
-      delay(1000);
-      DEBUG(LOG_WARNING,"No enroll information, trying to re-enroll");
-      pm.sendCommand(Pmax_RESTORE);      
-    }
+    lastMsg = millis();
   }
-  else if(pm.getSecondsFromLastComm() > 120)
+
+  if(millis() - lastMsg > 300 || millis() < lastMsg)
   {
-      //this should not happen (no comms), to re-establish we re-enroll
-      delay(1000);
-      DEBUG(LOG_WARNING,"Communication failure - trying to re-enroll");
-      pm.sendCommand(Pmax_RESTORE);
-  }  
+    pm.SendNextCommand();
+  }
 
 #ifdef PM_ENABLE_TELNET_ACCESS
   handleNewTelnetClients();
@@ -508,13 +525,18 @@ int os_serialPortRead(void* readBuff, int bytesToRead)
     int dwTotalRead = 0;
     while(bytesToRead > 0)
     {
-        if(Serial.available() == false)
+        for(int ix=0; ix<10; ix++)
         {
-          delay(50);
-          if(Serial.available() == false)
+          if(Serial.available())
           {
             break;
           }
+          delay(5);
+        }
+        
+        if(Serial.available() == false)
+        {
+            break;
         }
 
         *((char*)readBuff) = Serial.read();
@@ -544,11 +566,6 @@ bool os_serialPortInit(const char* portName) {
 void os_strncat_s(char* dst, int dst_size, const char* src)
 {
     strncat(dst, src, dst_size);
-}
-
-int os_cfg_getUserCode()
-{
-  return ALARM_USER_PIN;
 }
 
 int os_cfg_getZoneCnt()

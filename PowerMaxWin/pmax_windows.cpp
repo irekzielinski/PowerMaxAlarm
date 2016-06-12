@@ -524,12 +524,6 @@ void os_strncat_s(char* dst, int dst_size, const char* src)
 }
 
 ////////////////////////
-int os_cfg_getUserCode()
-{
-	//if your pin is 1234, you need to return 0x1234 (this is strange, as 0x makes it hex, but the only way it works)
-    return 0x1234; //IZIZTODO
-}
-
 const char * const cfg_zones[] = {  "system",  "front door", "hall", "living room",  "kitchen", 
                                     "study",  "upstairs", "conservatory", "garage", "back door", "garage2"};
 

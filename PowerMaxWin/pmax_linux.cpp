@@ -195,11 +195,6 @@ void os_strncat_s(char* dst, int dst_size, const char* src)
 }
 
 ////////////////////////
-int os_cfg_getUserCode()
-{
-    return 1234; //if your pin is 1234, you need to return 0x1234 (this is strange, as 0x makes it hex, but the only way it works)
-}
-
 const char * const cfg_zones[] = {"zone1",  "zone2", "zone3", "zone4",  "zone5", 
                                   "zone6",  "zone7", "zone8", "zone9", "zone10", 
                                   "zone11","zone12","zone13","zone14", "zone15"};

@@ -9,11 +9,16 @@
 #define  PACKET_TIMEOUT_DEFINED 2000
 #define  MAX_ZONE_COUNT 31
 
+//This Pin is a temporary pin for powerlink (this app). Does not have to match any of user or installer codes.
+//If your pin is 1234, you need to return 0x1234 (this is strange, as 0x makes it hex, but the only way it works).
+#define POWERLINK_PIN 0x3622;
+
 class PowerMaxAlarm;
 
 enum PmaxCommand
 {
     Pmax_ACK,
+    Pmax_PING,
     Pmax_GETEVENTLOG,
     Pmax_DISARM,
     Pmax_ARMHOME,
@@ -142,6 +147,46 @@ struct PmQueueItem
     const char* options;
 };
 
+struct PmConfig
+{
+    bool parsedOK;
+
+    char installerPin[5];
+    char masterInstallerPin[5];
+    char powerLinkPin[5];
+    char userPins[48][5];
+
+    //telephone numbers to call:
+    char phone[4][15]; //15: max 14 digits + NULL
+
+    char serialNumber[15];
+    char eprom[17];
+    char software[17];
+
+    //panel max capabilities (not actual count used):
+    unsigned char maxZoneCnt;
+    unsigned char maxCustomCnt;
+    unsigned char maxUserCnt;
+    unsigned char maxPartitionCnt;
+    unsigned char maxSirenCnt;
+    unsigned char maxKeypad1Cnt;
+    unsigned char maxKeypad2Cnt;
+    unsigned char maxKeyfobCnt;
+
+    PmConfig()
+    {
+        Init();
+    }
+
+    void Init()
+    {
+        memset(this, 0, sizeof(PmConfig));
+    }
+
+    void DumpToJson(IOutput* outputStream);
+    int GetMasterPinAsHex() const;
+};
+
 class PowerMaxAlarm
 {
     //Flags with[*] are one-shot notifications of last event
@@ -169,6 +214,9 @@ class PowerMaxAlarm
 
     FixedSizeQueue<PmQueueItem, MAX_SEND_QUEUE_DEPTH> m_sendQueue;
 
+    //config downloaded from PM, parsed using ProcessSettings
+    PmConfig m_cfg;
+
     bool m_bEnrolCompleted;
     bool m_bDownloadMode;
     int m_iPanelType;
@@ -181,7 +229,12 @@ class PowerMaxAlarm
     MemoryMap m_mapExtended;
 
     PlinkCommand m_lastSentCommand;
+    unsigned long m_ulLastPing;
 public:
+
+#ifdef _MSC_VER
+    void IZIZTODO_testMap();
+#endif
 
     void Init();
     void SendNextCommand();
@@ -198,7 +251,7 @@ public:
     void DumpToJson(IOutput* outputStream);
 
 private:
-    static void addPin(unsigned char* bufferToSend, int pos = 4);
+    void addPin(unsigned char* bufferToSend, int pos = 4, bool useMasterCode = false);
 
     bool isFlagSet(unsigned char id) const { return (flags & 1<<id) != 0; }
     bool isAlarmEvent() const{  return isFlagSet(7); }
@@ -264,7 +317,6 @@ int  os_serialPortWrite(const void* dataToWrite, int bytesToWrite);
 bool os_serialPortClose();
 void os_usleep(int microseconds);
 
-int os_cfg_getUserCode();
 int os_cfg_getZoneCnt();
 const char* os_cfg_getZoneName(int idx);
 int os_cfg_getPacketTimeout();

@@ -82,17 +82,12 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
       pm->sendCommand(Pmax_GETEVENTLOG);
     }
     else if ( c == 't' ) {
-      DEBUG(LOG_NOTICE,"try re-enroll");
+      DEBUG(LOG_NOTICE,"Restore Comms");
       pm->sendCommand(Pmax_RESTORE);
     }
     else if ( c == 'v' ) {
-      DEBUG(LOG_NOTICE,"getting versions string");
-      pm->sendCommand(Pmax_DL_START);
-      //pm->sendCommand(Pmax_GETVERSION); //IZIZTODO
-    }
-    else if ( c == 'V' ) {
+      DEBUG(LOG_NOTICE,"Exit Download mode");
       pm->sendCommand(Pmax_DL_EXIT);
-      //pm->sendCommand(Pmax_GETVERSION); //IZIZTODO
     }
     else if ( c == 'r' ) {
       DEBUG(LOG_NOTICE,"Request Status Update");
@@ -110,16 +105,54 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
         DEBUG(LOG_NO_FILTER,"\t d - Disarm");
         DEBUG(LOG_NO_FILTER,"\t a - Arm Away");
         DEBUG(LOG_NO_FILTER,"\t g - Get Event Log");
-        DEBUG(LOG_NO_FILTER,"\t t - Re-Enroll");
-        DEBUG(LOG_NO_FILTER,"\t v - Get Version String");
+        DEBUG(LOG_NO_FILTER,"\t t - Restore comms");
+        DEBUG(LOG_NO_FILTER,"\t v - Exit download mode");
         DEBUG(LOG_NO_FILTER,"\t r - Request Status Update");
         DEBUG(LOG_NO_FILTER,"\t j - Dump Application Status to JSON");
     }
   }
 }
 
+void saveMapToFile(const char* name, MemoryMap* map)
+{
+    HANDLE hDump = CreateFileA(name, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    for(int ix=0; ix<MAX_PAGES_CNT; ix++)
+    {
+        unsigned char page[MAX_PAGE_SIZE] = {0};
+        if(map->Exist(ix))
+        {
+            
+            map->Read(ix,0,MAX_PAGE_SIZE, page);
+        }
+
+        DWORD dw;
+        WriteFile(hDump, page, MAX_PAGE_SIZE,&dw, NULL);
+    }
+    CloseHandle(hDump);
+}
+
+void loadMapToFile(const char* name, MemoryMap* map)
+{
+    HANDLE hDump = CreateFileA(name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    for(int ix=0; ix<MAX_PAGES_CNT; ix++)
+    {
+        DWORD dw;
+        unsigned char page[MAX_PAGE_SIZE] = {0};
+        ReadFile(hDump, page, MAX_PAGE_SIZE, &dw, NULL);
+        map->Write(ix,0,MAX_PAGE_SIZE, page);
+    }
+    CloseHandle(hDump);
+}
+
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+    /*{
+        PowerMaxAlarm pm;
+        pm.IZIZTODO_testMap();
+    }
+    return 0;*/
+
     if(os_serialPortInit("COM3") == false)
     {
         return 1;
@@ -140,7 +173,7 @@ int _tmain(int argc, _TCHAR* argv[])
             dwLastMsg = GetTickCount();
         }
         
-        if(GetTickCount() - dwLastMsg > 1000)
+        if(GetTickCount() - dwLastMsg > 300)
         {
             pm.SendNextCommand();
         }

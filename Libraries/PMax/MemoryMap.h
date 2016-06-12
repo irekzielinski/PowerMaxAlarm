@@ -1,7 +1,7 @@
 #pragma once
 #include <string.h>
 //content is populated only once, on download, so it's OK to use dynamic memory allocation even on embeded devices
-#define MAX_PAGES_CNT 15
+#define MAX_PAGES_CNT 27
 #define MAX_PAGE_SIZE 0x100
 class MemoryMap
 {

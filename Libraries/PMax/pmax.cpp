@@ -1,6 +1,6 @@
 #include "pmax.h"
 #include <string.h>
-#include <string>
+#include <stdlib.h>
 
 #define IMPEMENT_GET_FUNCTION(tblName)\
 const char* GetStr##tblName(int index)\
@@ -20,17 +20,17 @@ const char* GetStr##tblName(int index)\
 '########################################################
 
 ' ### ACK messages, depending on the type, we need to ACK differently ###
-Private VMSG_ACK1 As Byte[] = [&H02] 'NONE
-Private VMSG_ACK2 As Byte[] = [&H02, &H43] 'NONE
+Private VMSG_ACK1 {&H02] 'NONE
+Private VMSG_ACK2 {&H02, &H43] 'NONE
 
 
 
-Private VMSG_ARMDISARM As Byte[] = [&HA1, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H43] 'NONE - MasterCode: 4 & 5
-Private VMSG_STATUS As Byte[] = [&HA2, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H43] 'A5
-Private VMSG_EVENTLOG As Byte[] = [&HA0, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H43] 'A0 - MasterCode: 4 & 5
+Private VMSG_ARMDISARM {&HA1, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H43] 'NONE - MasterCode: 4 & 5
+Private VMSG_STATUS {&HA2, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H43] 'A5
+Private VMSG_EVENTLOG {&HA0, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H00, &H43] 'A0 - MasterCode: 4 & 5
 
 ' #### PowerMaster message ###
-Private VMSG_PMASTER_STAT1 As Byte[] = [&HB0, &H01, &H04, &H06, &H02, &HFF, &H08, &H03, &H00, &H00, &H43] 'B0 STAT1
+Private VMSG_PMASTER_STAT1 {&HB0, &H01, &H04, &H06, &H02, &HFF, &H08, &H03, &H00, &H00, &H43] 'B0 STAT1
 
 
 
@@ -45,41 +45,55 @@ Private VMSG_PMASTER_STAT1 As Byte[] = [&HB0, &H01, &H04, &H06, &H02, &HFF, &H08
 ' E.g. 3E FF FF 42 1F B0 05 48 01 00 00
 ' 1=FF 2=FF 3=Low Length, 4=High Length, 5=Always B0, 6=Index, 7=Page
 ' ---*/
-//Private VMSG_DL_PANELFW As Byte[] = [0x3E, 0x00, 0x04, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_ZONESTR As Byte[] = [0x3E, 0x00, 0x19, 0x00, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_SERIAL As Byte[] = [0x3E, 0x30, 0x04, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//'Private VMSG_DL_EVENTLOG As Byte[] = [0x3E, 0xDF, 0x04, 0x28, 0x03, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_TIME As Byte[] = [0x3E, 0xF8, 0x00, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private vMSG_DL_COMMDEF As Byte[] = [0x3E, 0x01, 0x01, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_USERPINCODES As Byte[] = [0x3E, 0xFA, 0x01, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_PANELFW {0x3E, 0x00, 0x04, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+#define VMSG_DL_ZONESTR {0x3E, 0x00, 0x19, 0x00, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+#define VMSG_DL_SERIAL {0x3E, 0x30, 0x04, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+//'Private VMSG_DL_EVENTLOG {0x3E, 0xDF, 0x04, 0x28, 0x03, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//#define VMSG_DL_TIME {0x3E, 0xF8, 0x00, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+//Private vMSG_DL_COMMDEF {0x3E, 0x01, 0x01, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_USERPINCODES {0x3E, 0xFA, 0x01, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 #define VMSG_DL_OTHERPINCODES {0x3E, 0x0A, 0x02, 0x0A, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 #define VMSG_DL_PHONENRS {0x3E, 0x36, 0x01, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
-//Private VMSG_DL_PGMX10 As Byte[] = [0x3E, 0x14, 0x02, 0xD5, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_PARTITIONS As Byte[] = [0x3E, 0x00, 0x03, 0xF0, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_ZONES As Byte[] = [0x3E, 0x00, 0x09, 0x78, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_KEYFOBS As Byte[] = [0x3E, 0x78, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_2WKEYPADS As Byte[] = [0x3E, 0x00, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_1WKEYPADS As Byte[] = [0x3E, 0x20, 0x0A, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_SIRENS As Byte[] = [0x3E, 0x60, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_X10NAMES As Byte[] = [0x3E, 0x30, 0x0B, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_ZONENAMES As Byte[] = [0x3E, 0x40, 0x0B, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//'Private VMSG_DL_ZONECUSTOM As Byte[] = [0x3E, 0xA0, 0x1A, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_PGMX10 {0x3E, 0x14, 0x02, 0xD5, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_PARTITIONS {0x3E, 0x00, 0x03, 0xF0, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_ZONES {0x3E, 0x00, 0x09, 0x78, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_KEYFOBS {0x3E, 0x78, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_2WKEYPADS {0x3E, 0x00, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_1WKEYPADS {0x3E, 0x20, 0x0A, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_SIRENS {0x3E, 0x60, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_X10NAMES {0x3E, 0x30, 0x0B, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_ZONENAMES {0x3E, 0x40, 0x0B, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//'Private VMSG_DL_ZONECUSTOM {0x3E, 0xA0, 0x1A, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //
 //' ### PowerMaster download/config items ###
-//Private VMSG_DL_MASTER_SIRENKEYPADSZONE As Byte[] = [0x3E, 0xE2, 0xB6, 0x10, 0x04, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_USERPINCODES As Byte[] = [0x3E, 0x98, 0x0A, 0x60, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_SIRENS As Byte[] = [0x3E, 0xE2, 0xB6, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_KEYPADS As Byte[] = [0x3E, 0x32, 0xB7, 0x40, 0x01, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_ZONENAMES As Byte[] = [0x3E, 0x60, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_ZONES As Byte[] = [0x3E, 0x72, 0xB8, 0x80, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER10_EVENTLOG As Byte[] = [0x3E, 0xFF, 0xFF, 0xD2, 0x07, 0xB0, 0x05, 0x48, 0x01, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER30_EVENTLOG As Byte[] = [0x3E, 0xFF, 0xFF, 0x42, 0x1F, 0xB0, 0x05, 0x48, 0x01, 0x00, 0x00] '0x3F
+//Private VMSG_DL_MASTER_SIRENKEYPADSZONE {0x3E, 0xE2, 0xB6, 0x10, 0x04, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_MASTER_USERPINCODES {0x3E, 0x98, 0x0A, 0x60, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+//Private VMSG_DL_MASTER_SIRENS {0x3E, 0xE2, 0xB6, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_MASTER_KEYPADS {0x3E, 0x32, 0xB7, 0x40, 0x01, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_MASTER_ZONENAMES {0x3E, 0x60, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_MASTER_ZONES {0x3E, 0x72, 0xB8, 0x80, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+//Private VMSG_DL_MASTER10_EVENTLOG {0x3E, 0xFF, 0xFF, 0xD2, 0x07, 0xB0, 0x05, 0x48, 0x01, 0x00, 0x00] '0x3F
+//Private VMSG_DL_MASTER30_EVENTLOG {0x3E, 0xFF, 0xFF, 0x42, 0x1F, 0xB0, 0x05, 0x48, 0x01, 0x00, 0x00] '0x3F
 //
-//Private VMSG_SET_DATETIME As Byte[] = [0x46, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF] '0x46
+//Private VMSG_SET_DATETIME {0x46, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF] '0x46
 
 
-//    {{0xAA,0x12,0x34,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x43},12 ,"Enable bypass"        ,NULL},
-//    {{0xAA,0x12,0x34,0x00,0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Disable bypass"       ,NULL},
+//########################################################
+// PowerMax/Master definitions for partitions, events, keyfobs, etc
+//########################################################
+// 0=PowerMax, 1=PowerMax+, 2=PowerMax Pro, 3=PowerMax Complete, 4=PowerMax Pro Part
+// 5=PowerMax Complete Part, 6=PowerMax Express, 7=PowerMaster10, 8=PowerMaster30
+// Those are defines, not globals to save memory (important on embeded devices)
+#define VCFG_PARTITIONS {1, 1, 1, 1, 3, 3, 1, 3, 3}
+#define VCFG_KEYFOBS {8, 8, 8, 8, 8, 8, 8, 8, 32}
+#define VCFG_1WKEYPADS {8, 8, 8, 8, 8, 8, 8, 0, 0}
+#define VCFG_2WKEYPADS {2, 2, 2, 2, 2, 2, 2, 8, 32}
+#define VCFG_SIRENS {2, 2, 2, 2, 2, 2, 2, 4, 8}
+#define VCFG_USERCODES {8, 8, 8, 8, 8, 8, 8, 8, 48}
+#define VCFG_WIRELESS {28, 28, 28, 28, 28, 28, 28, 29, 62}
+#define VCFG_WIRED {2, 2, 2, 2, 2, 2, 1, 1, 2}
+#define VCFG_ZONECUSTOM {0, 5, 5, 5, 5, 5, 5, 5, 5}
+
 bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
 {
     switch(cmd)
@@ -98,33 +112,44 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
             }
         }
 
+    case Pmax_PING:
+        {
+            unsigned char buff[] = {0xAB,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x43};
+            return sendBuffer(buff, sizeof(buff));
+
+            if(m_bDownloadMode == true)
+            {
+                DEBUG(LOG_WARNING,"Sending Ping in Download Mode?");
+            }
+        }
+
     case Pmax_GETEVENTLOG:
         {
-            unsigned char buff[] = {0xA0,0x00,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff);
+            unsigned char buff[] = {0xA0,0x00,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
             return QueueCommand(buff, sizeof(buff), "Pmax_GETEVENTLOG", 0xA0, "PIN:MasterCode:4");
         }
 
     case Pmax_DISARM:
         {
-            unsigned char buff[] = {0xA1,0x00,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff);
+            unsigned char buff[] = {0xA1,0x00,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
             return sendBuffer(buff, sizeof(buff));
         }
 
     case Pmax_ARMHOME:
         {
-            unsigned char buff[] = {0xA1,0x00,0x00,0x04,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff);
+            unsigned char buff[] = {0xA1,0x00,0x00,0x04,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
             return sendBuffer(buff, sizeof(buff));
         }
 
     case Pmax_ARMAWAY:
         {
-            unsigned char buff[] = {0xA1,0x00,0x00,0x05,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff);
+            unsigned char buff[] = {0xA1,0x00,0x00,0x05,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
             return sendBuffer(buff, sizeof(buff));
         }
 
     case Pmax_ARMAWAY_INSTANT:
         {
-            unsigned char buff[] = {0xA1,0x00,0x00,0x14,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff);
+            unsigned char buff[] = {0xA1,0x00,0x00,0x14,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
             return sendBuffer(buff, sizeof(buff));
         }
 
@@ -140,7 +165,7 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
         - Get some information from the Powermax
         - Use the bypass command
         - Use the disarm and arm commands
-        During the enrollment process the Powerlink will create a pin and register this pin at the Powermax. The advantage is that none of the already pins is required.
+        During the enrollment process the Powerlink will create a pin (see POWERLINK_PIN) and register this pin at the Powermax. The advantage is that none of the already pins is required.
         On the Powermax+ and Powermax Pro the (emulated) Powerlink can be enrolled via the installer menu, on the Powermax Complete the Powerlink will be registered automatically.
 
         When the (emulated) Powerlink is connected and the 'Install Powerlink' option is selected from the installer menu the Powermax sends the following message:
@@ -155,6 +180,8 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
         Note: When a new Powerlink module needs to be registered while there is already a Powerlink registered, the previous registered one needs to be uninstalled. You can do so by selecting 'Install Powerlink' from the installer menu en then press the disarm button.
 
         On PowerMax Complete: trigger enrolment by asking to start download, this will fail on access denied, and PM will ask for enrolment.
+        NOTE: POWERLINK_PIN is a download pin only (it will allow to enroll/download settings, but will not allow to arm/disarm. 
+              You can do this however: download the EEPROM settings, etract real pin, use it to arm/disarm.
     */
     case Pmax_ENROLLREPLY:
         {
@@ -555,6 +582,7 @@ void PowerMaxAlarm::Init() {
     m_iModelType = 0;
     m_bPowerMaster = false;
     m_ackTypeForLastMsg = ACK_1;
+    m_ulLastPing = os_getCurrentTimeSec();
 
     int count = os_cfg_getZoneCnt();
     printf("I have %d zone:\n", count);
@@ -610,11 +638,11 @@ unsigned long PowerMaxAlarm::getSecondsFromLastComm() const
     return (unsigned long)(os_getCurrentTimeSec()-lastIoTime); 
 }
 
-void PowerMaxAlarm::addPin(unsigned char* bufferToSend, int pos)
+void PowerMaxAlarm::addPin(unsigned char* bufferToSend, int pos, bool useMasterCode)
 {
-    int usercode = os_cfg_getUserCode();
-    bufferToSend[pos]=usercode>>8;
-    bufferToSend[pos+1]=usercode & 0x00FF ;
+    const int pin = useMasterCode ? m_cfg.GetMasterPinAsHex() : POWERLINK_PIN; //IZIZTODO
+    bufferToSend[pos]=pin>>8;
+    bufferToSend[pos+1]=pin & 0x00FF ;
 }
 
 void PowerMaxAlarm::PmaxEnroll(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
@@ -640,8 +668,7 @@ void PowerMaxAlarm::PowerLinkEnrolled()
    sendCommand(Pmax_DL_SERIAL);
 
    //Read the names of the zones
-   //IZIZTODO: PM responds with truncated packets (at least on windows)
-   //sendCommand(Pmax_DL_ZONESTR);
+   sendCommand(Pmax_DL_ZONESTR);
 
    //' Retrieve extra info if this is a PowerMaster
    //If $bPowerMaster Then 
@@ -808,34 +835,218 @@ void PowerMaxAlarm::PmaxPing(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
     pm->StartKeepAliveTimer();
 }
 
-void PowerMaxAlarm::ProcessSettings()
+#ifdef _MSC_VER
+//IZIZTODO: delete this
+void loadMapToFile(const char* name, MemoryMap* map);
+void saveMapToFile(const char* name, MemoryMap* map);
+void PowerMaxAlarm::IZIZTODO_testMap()
 {
-    unsigned char tmpBuff[MAX_BUFFER_SIZE] = {0};
+    m_iPanelType = 5;
+    m_bPowerMaster = false;
+    loadMapToFile("main.map", &m_mapMain);
+    ProcessSettings();
 
+    ConsoleOutput c;
+    m_cfg.DumpToJson(&c);
+}
+#endif
+
+void PmConfig::DumpToJson(IOutput* outputStream)
+{
+    outputStream->write("{");
     {
-        //Retrieve the installer and powerlink pincodes - they are known/visible
-        unsigned char msg[] = VMSG_DL_OTHERPINCODES;
-        int readCnt = ReadMemoryMap(msg, tmpBuff, sizeof(tmpBuff));
+        outputStream->writeJsonTag("installer_pin", installerPin);
+        outputStream->writeJsonTag("masterinstaller_pin", masterInstallerPin);
+        outputStream->writeJsonTag("powerlink_pin", powerLinkPin);
+        
+        outputStream->write("\"user_pins\":[");
+        bool first = true;
+        for(int ix=0; ix<maxUserCnt; ix++)
+        {
+            if(strcmp(userPins[ix], "0000") != 0)
+            {
+                if(first == false)
+                {
+                    outputStream->write(",");
+                }
+                outputStream->write("\"");
+                outputStream->write(userPins[ix]);
+                outputStream->write("\"");
+                first = false;
+           }
+        }
+        outputStream->write("],\r\n");
 
-        DEBUG(LOG_INFO, "installer pin: %X%X", tmpBuff[0], tmpBuff[1]);
-        DEBUG(LOG_INFO, "masterinstaller pin: %X%X", tmpBuff[2], tmpBuff[3]);
-        DEBUG(LOG_INFO, "powerlink pin: %X%X", tmpBuff[8], tmpBuff[9]);
-        //$cConfig["pincode"]["installer"] = ByteToHex(sData.Copy(0, 2))
-        //$cConfig["pincode"]["masterinstaller"] = ByteToHex(sData.Copy(2, 2))
-        //$cConfig["pincode"]["powerlink"] = ByteToHex(sData.Copy(8, 2))
+
+        outputStream->write("\"telephone_numbers\":[");
+        first = true;
+        for(int ix=0; ix<4; ix++)
+        {
+            if(phone[ix][0] != '\0')
+            {
+                if(first == false)
+                {
+                    outputStream->write(",");
+                }
+                outputStream->write("\"");
+                outputStream->write(phone[ix]);
+                outputStream->write("\"");
+                first = false;
+           }
+        }
+        outputStream->write("],\r\n");
+
+        outputStream->writeJsonTag("serial_number", serialNumber);
+        outputStream->writeJsonTag("eprom", eprom);
+        outputStream->writeJsonTag("software", software);
     }
 
+    outputStream->write("}");
+}
+
+int PmConfig::GetMasterPinAsHex() const
+{
+    //master pin is the first pin of the user:
+    return strtol(userPins[0], NULL, 16);
+}
+
+void PowerMaxAlarm::ProcessSettings()
+{
+    m_cfg.Init();
+    
+    unsigned char readBuff[512] = {0}; //512 is needed to read zone names in PowerMax Complete
+
+    if( m_iPanelType == -1 )
     {
-        unsigned char msg[] = VMSG_DL_PHONENRS;
-        int readCnt = ReadMemoryMap(msg, tmpBuff, sizeof(tmpBuff));
-        for(int iCnt=1; iCnt<=4; iCnt++)
+        DEBUG(LOG_WARNING, "ERROR: Can't process settings, the PanelType is unknown");
+        return;
+    }   
+
+    if( m_iPanelType > 8 )
+    {
+        DEBUG(LOG_WARNING,"ERROR: Can't process settings, the PanelType= %d is a too new type", m_iPanelType);
+        return;
+    }  
+    
+    //Read serialnumber and paneltype info, and some sanity check
+    {
+        const unsigned char msg[] = VMSG_DL_SERIAL;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        if(readCnt < 8)
+        {
+            DEBUG(LOG_WARNING,"ERROR: Can't read the PowerMax/Master MemoryMap, communication with the unit went wrong?");
+            return;
+        }
+
+        if(readBuff[7] != m_iPanelType)
+        {
+            DEBUG(LOG_WARNING,"ERROR: Initial received PanelType is different then read from MemoryMap. PanelType=%d, Read=%d", m_iPanelType, readBuff[7]);
+            return;
+        }
+
+        sprintf(m_cfg.serialNumber, "%02X%02X%02X%02X%02X%02X", readBuff[0], readBuff[1], readBuff[2], readBuff[3], readBuff[4], readBuff[5]);
+        char* end = strchr(m_cfg.serialNumber, 'F');
+        if(end)
+        {
+            *end = '\0';
+        }
+
+        //basic sanity check passed:
+        m_cfg.parsedOK = true;
+    }
+
+    { //Now it looks to be safe to determine panel options/dimensions
+        unsigned char tmpVCFG_PARTITIONS[] = VCFG_PARTITIONS;
+        unsigned char tmpVCFG_KEYFOBS[]    = VCFG_KEYFOBS;
+        unsigned char tmpVCFG_1WKEYPADS[]  = VCFG_1WKEYPADS;
+        unsigned char tmpVCFG_2WKEYPADS[]  = VCFG_2WKEYPADS;
+        unsigned char tmpVCFG_SIRENS[]     = VCFG_SIRENS;
+        unsigned char tmpVCFG_USERCODES[]  = VCFG_USERCODES;
+        unsigned char tmpVCFG_WIRELESS[]   = VCFG_WIRELESS;
+        unsigned char tmpVCFG_WIRED[]      = VCFG_WIRED;
+        unsigned char tmpVCFG_ZONECUSTOM[] = VCFG_ZONECUSTOM;
+
+        m_cfg.maxZoneCnt =      tmpVCFG_WIRELESS[m_iPanelType] + tmpVCFG_WIRED[m_iPanelType];
+        m_cfg.maxCustomCnt =    tmpVCFG_ZONECUSTOM[m_iPanelType];
+        m_cfg.maxUserCnt =      tmpVCFG_USERCODES[m_iPanelType];
+        m_cfg.maxPartitionCnt = tmpVCFG_PARTITIONS[m_iPanelType];
+        m_cfg.maxSirenCnt =     tmpVCFG_SIRENS[m_iPanelType];
+        m_cfg.maxKeypad1Cnt =   tmpVCFG_1WKEYPADS[m_iPanelType];
+        m_cfg.maxKeypad2Cnt =   tmpVCFG_2WKEYPADS[m_iPanelType];
+        m_cfg.maxKeyfobCnt =    tmpVCFG_KEYFOBS[m_iPanelType];
+    }
+
+    { //Read panel eprom and software info
+        const unsigned char msg[] = VMSG_DL_PANELFW;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        if(readCnt >=  16) strncpy(m_cfg.eprom, (const char*)readBuff, sizeof(m_cfg.eprom)-1);
+        if(readCnt >=  32) sprintf(m_cfg.software, (const char*)readBuff+16, sizeof(m_cfg.software)-1); 
+    }
+
+    //IZIZTODO:
+    /*{ //Determine the zone names, including the custom ones
+        const unsigned char msg[] = VMSG_DL_ZONESTR;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        //$cConfig["panel"]["datetime"] = Format$(sData[3], "00") & "/" & Format$(sData[4], "00") & "/" & CStr(CInt(sData[5]) + 2000) & " " & Format$(sData[2], "00") & ":" & Format$(sData[1], "00") & ":" & Format$(sData[0], "00")
+
+      readBuff[1] = 'a';
+    }*/
+
+    { //Get user pin codes
+        int readCnt;
+        if(m_bPowerMaster)
+        {
+            const unsigned char msg[] = VMSG_DL_MASTER_USERPINCODES;
+            readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        }
+        else
+        {
+            const unsigned char msg[] = VMSG_DL_USERPINCODES;
+            readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        }
+
+        if(readCnt != m_cfg.maxUserCnt*2)
+        {
+            DEBUG(LOG_WARNING,"ERROR: Failed to read user codes. Expected len: %d, got: %d", m_cfg.maxUserCnt*2, readCnt);
+        }
+        else
+        {
+            for(int ix=0; ix<m_cfg.maxUserCnt; ix++)
+            {
+                sprintf(m_cfg.userPins[ix], "%02X%02X", readBuff[ix*2+0], readBuff[ix*2+1]);
+            }
+        }
+    }
+
+    { //Retrieve the installer and powerlink pincodes - they are known/visible
+        const unsigned char msg[] = VMSG_DL_OTHERPINCODES;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        if(readCnt >=  2) sprintf(m_cfg.installerPin,       "%02X%02X", readBuff[0], readBuff[1]);
+        if(readCnt >=  4) sprintf(m_cfg.masterInstallerPin, "%02X%02X", readBuff[2], readBuff[3]); 
+        if(readCnt >= 10) sprintf(m_cfg.powerLinkPin,       "%02X%02X", readBuff[8], readBuff[9]); 
+    }
+
+    { //Get PHONE numbers:
+        const unsigned char msg[] = VMSG_DL_PHONENRS;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        for(int iCnt=0; iCnt<4; iCnt++)
         {
             for(int jCnt=0; jCnt<=7; jCnt++)
             {
-                if(tmpBuff[8 * (iCnt - 1) + jCnt] != 0xFF)
+                if(readBuff[8 * iCnt + jCnt] != 0xFF)
                 {
-                    unsigned char p = tmpBuff[8 * (iCnt - 1) + jCnt];
-                    p++;
+                    char szTwoDigits[10] = "";
+                    sprintf(szTwoDigits, "%02X", readBuff[8 * iCnt + jCnt]);
+                    if(szTwoDigits[1] == 'F')
+                    {
+                        szTwoDigits[1] = '\0';
+                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
+                        break;
+                    }
+                    else
+                    {
+                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
+                    }
                 }
             }
         }
@@ -853,6 +1064,11 @@ void PowerMaxAlarm::PmaxAck(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
         //this will be false for the first Pmax_DL_EXIT that is called from Init()
         if(pm->m_bEnrolCompleted)
         {
+#ifdef _MSC_VER
+            saveMapToFile("main.map", &pm->m_mapMain);
+            saveMapToFile("ext.map", &pm->m_mapExtended);
+#endif
+
             pm->ProcessSettings();
 
             //after download is complete, we call restore - this will get other important settings, and make sure panel is happy with comms
@@ -1119,6 +1335,16 @@ unsigned char calculChecksum(const unsigned char* data, int dataSize) {
 
 void  PowerMaxAlarm::SendNextCommand()
 {
+    if(m_bDownloadMode == false)
+    {
+        if(os_getCurrentTimeSec() - m_ulLastPing > 30)
+        {
+            m_ulLastPing = os_getCurrentTimeSec();
+            sendCommand(Pmax_PING);
+            return;
+        }
+    }
+
     if(m_sendQueue.isEmpty())
     {
         return;
@@ -1349,6 +1575,13 @@ void PowerMaxAlarm::DumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("stat_str", GetStrPmaxSystemStatus(stat));
         outputStream->writeJsonTag("lastCom", (int)getSecondsFromLastComm());
         
+        if(m_cfg.parsedOK)
+        {
+            outputStream->write("\"config\":");
+            m_cfg.DumpToJson(outputStream);
+            outputStream->write("\r\n");
+        }
+
         outputStream->writeJsonTag("flags", flags);
         outputStream->writeJsonTag("flags.ready", isFlagSet(0));
         outputStream->writeJsonTag("flags.alertInMemory", isFlagSet(1));
