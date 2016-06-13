@@ -524,23 +524,6 @@ void os_strncat_s(char* dst, int dst_size, const char* src)
 }
 
 ////////////////////////
-const char * const cfg_zones[] = {  "system",  "front door", "hall", "living room",  "kitchen", 
-                                    "study",  "upstairs", "conservatory", "garage", "back door", "garage2"};
-
-int os_cfg_getZoneCnt()
-{
-    return sizeof(cfg_zones)/sizeof(cfg_zones[0]);
-}
-
-const char* os_cfg_getZoneName(int idx)
-{
-	if(idx >= os_cfg_getZoneCnt())
-	{
-		return "??";
-	}
-
-    return cfg_zones[idx];
-}
 
 int os_cfg_getPacketTimeout()
 {

@@ -195,19 +195,6 @@ void os_strncat_s(char* dst, int dst_size, const char* src)
 }
 
 ////////////////////////
-const char * const cfg_zones[] = {"zone1",  "zone2", "zone3", "zone4",  "zone5", 
-                                  "zone6",  "zone7", "zone8", "zone9", "zone10", 
-                                  "zone11","zone12","zone13","zone14", "zone15"};
-
-int os_cfg_getZoneCnt()
-{
-    return sizeof(cfg_zones)/sizeof(cfg_zones[0]);
-}
-
-const char* os_cfg_getZoneName(int idx)
-{
-    return cfg_zones[idx];
-}
 
 int os_cfg_getPacketTimeout()
 {

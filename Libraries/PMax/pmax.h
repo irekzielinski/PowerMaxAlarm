@@ -125,15 +125,18 @@ struct ZoneState {
 };
 
 struct Zone {
-    unsigned char id;    //this will be used to resolve name form configuration
     bool enrolled;       //PowerMax knows about this zone (it's configured)
+    char name[0x11];     //Will be dowloaded from PowerMax eprom
+    unsigned char zonetype;
+    unsigned char sensorid;
+    const char* sensortype;
+    const char* autocreate;
 
     ZoneState stat;      //basic state of the zone
 
     ZoneEvent lastEvent; //last event recodred for this zone
     unsigned long lastEventTime;
 
-    const char* getName() const;
     void DumpToJson(IOutput* outputStream);
 };
 
@@ -162,6 +165,8 @@ struct PmConfig
     char serialNumber[15];
     char eprom[17];
     char software[17];
+
+    unsigned char partitionCnt;
 
     //panel max capabilities (not actual count used):
     unsigned char maxZoneCnt;
@@ -209,13 +214,13 @@ class PowerMaxAlarm
     //status of all zones (0 is not used, system)
     Zone zone[MAX_ZONE_COUNT];
 
+    //config downloaded from PM, parsed using ProcessSettings
+    PmConfig m_cfg;
+
     //used to detect when PowerMax stops talking to us, that will trigger re-establish comms message
     time_t lastIoTime;
 
     FixedSizeQueue<PmQueueItem, MAX_SEND_QUEUE_DEPTH> m_sendQueue;
-
-    //config downloaded from PM, parsed using ProcessSettings
-    PmConfig m_cfg;
 
     bool m_bEnrolCompleted;
     bool m_bDownloadMode;
@@ -244,7 +249,7 @@ public:
     void handlePacket(PlinkBuffer  * commandBuffer);
    
     static bool isBufferOK(const PlinkBuffer* commandBuffer);
-    static const char* getZoneName(unsigned char zoneId);
+    const char* getZoneName(unsigned char zoneId);
 
     unsigned int getEnrolledZoneCnt() const;
     unsigned long getSecondsFromLastComm() const;
@@ -317,8 +322,6 @@ int  os_serialPortWrite(const void* dataToWrite, int bytesToWrite);
 bool os_serialPortClose();
 void os_usleep(int microseconds);
 
-int os_cfg_getZoneCnt();
-const char* os_cfg_getZoneName(int idx);
 int os_cfg_getPacketTimeout();
 
 void os_debugLog(int priority, bool raw, const char *function, int line,const char *format, ...);

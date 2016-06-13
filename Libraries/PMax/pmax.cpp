@@ -50,19 +50,19 @@ Private VMSG_PMASTER_STAT1 {&HB0, &H01, &H04, &H06, &H02, &HFF, &H08, &H03, &H00
 #define VMSG_DL_SERIAL {0x3E, 0x30, 0x04, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 //'Private VMSG_DL_EVENTLOG {0x3E, 0xDF, 0x04, 0x28, 0x03, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //#define VMSG_DL_TIME {0x3E, 0xF8, 0x00, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
-//Private vMSG_DL_COMMDEF {0x3E, 0x01, 0x01, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_COMMDEF {0x3E, 0x01, 0x01, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 #define VMSG_DL_USERPINCODES {0x3E, 0xFA, 0x01, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 #define VMSG_DL_OTHERPINCODES {0x3E, 0x0A, 0x02, 0x0A, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 #define VMSG_DL_PHONENRS {0x3E, 0x36, 0x01, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 //Private VMSG_DL_PGMX10 {0x3E, 0x14, 0x02, 0xD5, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_PARTITIONS {0x3E, 0x00, 0x03, 0xF0, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_ZONES {0x3E, 0x00, 0x09, 0x78, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_PARTITIONS {0x3E, 0x00, 0x03, 0xF0, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+#define VMSG_DL_ZONES {0x3E, 0x00, 0x09, 0x78, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 //Private VMSG_DL_KEYFOBS {0x3E, 0x78, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //Private VMSG_DL_2WKEYPADS {0x3E, 0x00, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //Private VMSG_DL_1WKEYPADS {0x3E, 0x20, 0x0A, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //Private VMSG_DL_SIRENS {0x3E, 0x60, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //Private VMSG_DL_X10NAMES {0x3E, 0x30, 0x0B, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_ZONENAMES {0x3E, 0x40, 0x0B, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_ZONENAMES {0x3E, 0x40, 0x0B, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 //'Private VMSG_DL_ZONECUSTOM {0x3E, 0xA0, 0x1A, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //
 //' ### PowerMaster download/config items ###
@@ -70,8 +70,8 @@ Private VMSG_PMASTER_STAT1 {&HB0, &H01, &H04, &H06, &H02, &HFF, &H08, &H03, &H00
 #define VMSG_DL_MASTER_USERPINCODES {0x3E, 0x98, 0x0A, 0x60, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 //Private VMSG_DL_MASTER_SIRENS {0x3E, 0xE2, 0xB6, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //Private VMSG_DL_MASTER_KEYPADS {0x3E, 0x32, 0xB7, 0x40, 0x01, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_ZONENAMES {0x3E, 0x60, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
-//Private VMSG_DL_MASTER_ZONES {0x3E, 0x72, 0xB8, 0x80, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
+#define VMSG_DL_MASTER_ZONENAMES {0x3E, 0x60, 0x09, 0x40, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+#define VMSG_DL_MASTER_ZONES {0x3E, 0x72, 0xB8, 0x80, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
 //Private VMSG_DL_MASTER10_EVENTLOG {0x3E, 0xFF, 0xFF, 0xD2, 0x07, 0xB0, 0x05, 0x48, 0x01, 0x00, 0x00] '0x3F
 //Private VMSG_DL_MASTER30_EVENTLOG {0x3E, 0xFF, 0xFF, 0x42, 0x1F, 0xB0, 0x05, 0x48, 0x01, 0x00, 0x00] '0x3F
 //
@@ -464,96 +464,6 @@ const char*  PmaxZoneEventTypes[] = {
     "Siren AC Fail"
 };
 
-const char*  PmaxDefaultZoneNames[] = {
-    "System"               ,
-    "Zone 1"               ,
-    "Zone 2"               ,
-    "Zone 3"               ,
-    "Zone 4"               ,
-    "Zone 5"               ,
-    "Zone 6"               ,
-    "Zone 7"               ,
-    "Zone 8"               ,
-    "Zone 9"               ,
-    "Zone 10"              ,
-    "Zone 11"              ,
-    "Zone 12"              ,
-    "Zone 13"              ,
-    "Zone 14"              ,
-    "Zone 15"              ,
-    "Zone 16"              ,
-    "Zone 17"              ,
-    "Zone 18"              ,
-    "Zone 19"              ,
-    "Zone 20"              ,
-    "Zone 21"              ,
-    "Zone 22"              ,
-    "Zone 23"              ,
-    "Zone 24"              ,
-    "Zone 25"              ,
-    "Zone 26"              ,
-    "Zone 27"              ,
-    "Zone 28"              ,
-    "Zone 29"              ,
-    "Zone 30"              ,
-    "Keyfob1"              ,
-    "Keyfob2"              ,
-    "Keyfob3"              ,
-    "Keyfob4"              ,
-    "Keyfob5"              ,
-    "Keyfob6"              ,
-    "Keyfob7"              ,
-    "Keyfob8"              ,
-    "User1"                ,
-    "User2"                ,
-    "User3"                ,
-    "User4"                ,
-    "User5"                ,
-    "User6"                ,
-    "User7"                ,
-    "User8"                ,
-    "Wireless Commander1"  ,
-    "Wireless Commander2"  ,
-    "Wireless Commander3"  ,
-    "Wireless Commander4"  ,
-    "Wireless Commander5"  ,
-    "Wireless Commander6"  ,
-    "Wireless Commander7"  ,
-    "Wireless Commander8"  ,
-    "Wireless Siren1"      ,
-    "Wireless Siren2"      ,
-    "2Way Wireless Keypad1",
-    "2Way Wireless Keypad2",
-    "2Way Wireless Keypad3",
-    "2Way Wireless Keypad4",
-    "X10-1"                ,
-    "X10-2"                ,
-    "X10-3"                ,
-    "X10-4"                ,
-    "X10-5"                ,
-    "X10-6"                ,
-    "X10-7"                ,
-    "X10-8"                ,
-    "X10-9"                ,
-    "X10-10"               ,
-    "X10-11"               ,
-    "X10-12"               ,
-    "X10-13"               ,
-    "X10-14"               ,
-    "X10-15"               ,
-    "PGM"                  ,
-    "GSM"                  ,
-    "Powerlink"            ,
-    "Proxy Tag1"           ,
-    "Proxy Tag2"           ,
-    "Proxy Tag3"           ,
-    "Proxy Tag4"           ,
-    "Proxy Tag5"           ,
-    "Proxy Tag6"           ,
-    "Proxy Tag7"           ,
-    "Proxy Tag8"
-};
-
 const char*  PmaxPanelType[] = {
     "PowerMax"               ,
     "PowerMax+"              ,
@@ -568,7 +478,6 @@ const char*  PmaxPanelType[] = {
 
 IMPEMENT_GET_FUNCTION(PmaxSystemStatus);
 IMPEMENT_GET_FUNCTION(SystemStateFlags);
-IMPEMENT_GET_FUNCTION(PmaxDefaultZoneNames);
 IMPEMENT_GET_FUNCTION(PmaxZoneEventTypes);
 IMPEMENT_GET_FUNCTION(PmaxLogEvents);
 IMPEMENT_GET_FUNCTION(PmaxPanelType);
@@ -583,30 +492,12 @@ void PowerMaxAlarm::Init() {
     m_bPowerMaster = false;
     m_ackTypeForLastMsg = ACK_1;
     m_ulLastPing = os_getCurrentTimeSec();
-
-    int count = os_cfg_getZoneCnt();
-    printf("I have %d zone:\n", count);
-    for (int i = 0; i < count; i++) { 
-
-        DEBUG(LOG_NOTICE,"zone: %i, name: %s",i,os_cfg_getZoneName(i));
-    }
     
     flags = 0;
     stat  = SS_Not_Ready;
     lastIoTime = 0;
 
-    for (unsigned char i=1;i<MAX_ZONE_COUNT;i++) //zone 0 is not used (system)
-    {
-        zone[i].id             = i;
-        zone[i].enrolled       = false;
-        zone[i].stat.bypased   = false;
-        zone[i].stat.doorOpen  = false;
-        zone[i].stat.tamper    = false;
-        zone[i].stat.active    = false;
-        zone[i].stat.lowBattery= false;
-        zone[i].lastEvent      = ZE_None;
-        zone[i].lastEventTime  = 0;
-    }
+    memset(zone, 0, sizeof(zone));
 
     //if PM is in dowload mode, then it would interfere with out init sequence
     //so let's start with DL exit command
@@ -640,7 +531,7 @@ unsigned long PowerMaxAlarm::getSecondsFromLastComm() const
 
 void PowerMaxAlarm::addPin(unsigned char* bufferToSend, int pos, bool useMasterCode)
 {
-    const int pin = useMasterCode ? m_cfg.GetMasterPinAsHex() : POWERLINK_PIN; //IZIZTODO
+    const int pin = useMasterCode ? m_cfg.GetMasterPinAsHex() : POWERLINK_PIN;
     bufferToSend[pos]=pin>>8;
     bufferToSend[pos+1]=pin & 0x00FF ;
 }
@@ -899,6 +790,7 @@ void PmConfig::DumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("serial_number", serialNumber);
         outputStream->writeJsonTag("eprom", eprom);
         outputStream->writeJsonTag("software", software);
+        outputStream->writeJsonTag("partitionCnt", (int)partitionCnt);
     }
 
     outputStream->write("}");
@@ -970,6 +862,7 @@ void PowerMaxAlarm::ProcessSettings()
         m_cfg.maxCustomCnt =    tmpVCFG_ZONECUSTOM[m_iPanelType];
         m_cfg.maxUserCnt =      tmpVCFG_USERCODES[m_iPanelType];
         m_cfg.maxPartitionCnt = tmpVCFG_PARTITIONS[m_iPanelType];
+        m_cfg.partitionCnt    = tmpVCFG_PARTITIONS[m_iPanelType];
         m_cfg.maxSirenCnt =     tmpVCFG_SIRENS[m_iPanelType];
         m_cfg.maxKeypad1Cnt =   tmpVCFG_1WKEYPADS[m_iPanelType];
         m_cfg.maxKeypad2Cnt =   tmpVCFG_2WKEYPADS[m_iPanelType];
@@ -983,14 +876,221 @@ void PowerMaxAlarm::ProcessSettings()
         if(readCnt >=  32) sprintf(m_cfg.software, (const char*)readBuff+16, sizeof(m_cfg.software)-1); 
     }
 
-    //IZIZTODO:
-    /*{ //Determine the zone names, including the custom ones
+    char zoneNames[MAX_ZONE_COUNT][0x11];
+    memset(zoneNames, 0, sizeof(zoneNames));
+
+    { //Determine the zone names, including the custom ones.
         const unsigned char msg[] = VMSG_DL_ZONESTR;
         const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
-        //$cConfig["panel"]["datetime"] = Format$(sData[3], "00") & "/" & Format$(sData[4], "00") & "/" & CStr(CInt(sData[5]) + 2000) & " " & Format$(sData[2], "00") & ":" & Format$(sData[1], "00") & ":" & Format$(sData[0], "00")
+        if(readCnt == 0)
+        {
+            DEBUG(LOG_WARNING,"ERROR: Failed to read zone names, possibly data not downloaded, or supplied buffer too small");
+        }
+        else
+        {
+            for(int iCnt=0; iCnt < MAX_ZONE_COUNT; iCnt++)
+            {
+                if((iCnt*0x10)+0x10 <= readCnt)
+                {
+                    memcpy(zoneNames[iCnt], readBuff + (iCnt*0x10), 0x10);
+                    if((unsigned char)zoneNames[iCnt][0] == 0xFF)
+                    {
+                        zoneNames[iCnt][0] = '\0';
+                    }
+                }
+            }
+        }
+    }
 
-      readBuff[1] = 'a';
-    }*/
+    { //Get PHONE numbers:
+        const unsigned char msg[] = VMSG_DL_PHONENRS;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        for(int iCnt=0; iCnt<4; iCnt++)
+        {
+            for(int jCnt=0; jCnt<=7; jCnt++)
+            {
+                if(readBuff[8 * iCnt + jCnt] != 0xFF)
+                {
+                    char szTwoDigits[10] = "";
+                    sprintf(szTwoDigits, "%02X", readBuff[8 * iCnt + jCnt]);
+                    if(szTwoDigits[1] == 'F')
+                    {
+                        szTwoDigits[1] = '\0';
+                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
+                        break;
+                    }
+                    else
+                    {
+                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
+                    }
+                }
+            }
+        }
+    }
+
+    { //Alarm settings
+        const unsigned char msg[] = VMSG_DL_COMMDEF;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        if(readCnt < 30)
+        {
+            DEBUG(LOG_WARNING,"ERROR: Failed to read alarm settings");
+        }
+        else
+        {
+            //IZIZTODO: store, use?
+            unsigned char alarm_entrydelay1 = readBuff[0];
+            unsigned char alarm_entrydelay2 = readBuff[1];
+            unsigned char alarm_exitdelay = readBuff[2];
+            unsigned char alarm_belltime = readBuff[3];
+            unsigned char alarm_silentpanic = readBuff[25];
+
+            /*
+            $cConfig["alarm"]["silentpanic"] = (sData[25] And &H10 = &H10)
+            $cConfig["alarm"]["quickarm"] = (sData[26] And &H08 = &H08)
+            $cConfig["alarm"]["bypassoff"] = (sData[27] And &HC0 = &H00)
+            $cConfig["alarm"]["forceddisablecode"] = ByteToHex(sData.Copy(16, 2))
+            $iDisarmArmCode = CInt(sData[16]) * 256 + sData[17]
+            */
+        }
+    }
+
+    //If our panel supports multiple partitions, try to figure out if it is enabled or not
+    //PowerMax without partitions will not give the 0x0300 back when requested
+    if(m_cfg.maxPartitionCnt > 0)
+    { //Retrieve if partitioning is enabled
+            const unsigned char msg[] = VMSG_DL_PARTITIONS;
+            const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+            if(readCnt > 0)
+            {
+                if(readBuff[0] == 0)
+                {
+                    m_cfg.partitionCnt = 1;
+                }
+            }
+    }
+
+    { //Retrieve detailed zone information
+        unsigned char masterReadBuff[128] = {0};
+
+        const unsigned char msg[] = VMSG_DL_ZONES;
+        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        if(readCnt < 120)
+        {
+            DEBUG(LOG_WARNING,"ERROR: Failed to read zone settings");
+        }
+        else
+        {
+            int zoneNameIdxCnt = 0;
+            unsigned char zoneNamesIndexes[30] = {0};
+            
+            if(m_bPowerMaster)
+            {
+                const unsigned char msg[] = VMSG_DL_MASTER_ZONENAMES;
+                zoneNameIdxCnt = ReadMemoryMap(msg, zoneNamesIndexes, sizeof(zoneNamesIndexes));
+
+                const unsigned char msg2[] = VMSG_DL_MASTER_ZONES;
+                ReadMemoryMap(msg2, masterReadBuff, sizeof(masterReadBuff));
+            }
+            else
+            {
+                const unsigned char msg[] = VMSG_DL_ZONENAMES;
+                zoneNameIdxCnt = ReadMemoryMap(msg, zoneNamesIndexes, sizeof(zoneNamesIndexes));
+                if(zoneNameIdxCnt != sizeof(zoneNamesIndexes))
+                {
+                    DEBUG(LOG_WARNING,"ERROR: Failed to read zone name indexes");
+                }
+            }
+            
+            strcpy(zone[0].name, "System"); //we enumerate from 1, zone 0 is not used (system)
+            for(int iCnt=1; iCnt<=m_cfg.maxZoneCnt;  iCnt++)
+            {
+                if(iCnt > MAX_ZONE_COUNT)
+                {
+                    DEBUG(LOG_WARNING,"ERROR: Failed to read all zones, as MAX_ZONE_COUNT is too small. Increase it to: %d", m_cfg.maxZoneCnt);
+                    break;
+                }
+
+                Zone* pZone = &zone[iCnt];
+
+                if(m_bPowerMaster)
+                {
+                    pZone->enrolled = masterReadBuff[iCnt * 10 - 6] != 0 || masterReadBuff[iCnt * 10 - 5] != 0 || masterReadBuff[iCnt * 10 - 4] != 0 || masterReadBuff[iCnt * 10 - 3] != 0 || masterReadBuff[iCnt * 10 - 2] != 0;
+                }
+                else
+                {
+                    pZone->enrolled = readBuff[iCnt * 4 - 4] != 0 || readBuff[iCnt * 4 - 3] != 0 || readBuff[iCnt * 4 - 2] != 0;
+                }
+
+                if(pZone->enrolled == false)
+                {
+                    continue;
+                }
+
+                int zoneIndex = zoneNamesIndexes[iCnt-1];
+                if(zoneIndex < MAX_ZONE_COUNT)
+                {
+                    strcpy(pZone->name, zoneNames[zoneIndex]);
+                }
+                else
+                {
+                    strcpy(pZone->name, "Unknown");
+                }
+                
+                if(m_bPowerMaster)
+                {
+                    //IZIZTODO
+                }
+                else
+                {
+                    pZone->zonetype = readBuff[iCnt * 4 - 1];
+                    pZone->sensorid = readBuff[iCnt * 4 - 2];
+
+                    switch(pZone->sensorid & 0xF)
+                    {
+                    case 0x0:
+                        pZone->sensortype = "Vibration";
+                        pZone->autocreate = "Visonic Vibration Sensor";
+                        break;
+
+                    case 0x3:
+                    case 0x4:
+                    case 0xC:
+                        pZone->sensortype = "Motion";
+                        pZone->autocreate = "Visonic PIR";
+                        break;
+
+                    case 0x5:
+                    case 0x6:
+                    case 0x7:
+                        pZone->sensortype = "Magnet";
+                        pZone->autocreate = "Visonic Door/Window Contact";
+                        break;
+
+                    case 0xA:
+                        pZone->sensortype = "Smoke";
+                        pZone->autocreate = "Visonic Smoke Detector";
+                        break;
+
+                    case 0xB:
+                        pZone->sensortype = "Gas";
+                        pZone->autocreate = "Visonic Gas Detector";
+                        break;
+
+                    case 0xF:
+                        pZone->sensortype = "Wired";
+                        pZone->autocreate = "Visonic PIRWired";
+                        break;
+
+                    default:
+                        pZone->sensortype = "Unknown";
+                        pZone->autocreate = "Visonic Unknown";
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
 
     { //Get user pin codes
         int readCnt;
@@ -1026,31 +1126,7 @@ void PowerMaxAlarm::ProcessSettings()
         if(readCnt >= 10) sprintf(m_cfg.powerLinkPin,       "%02X%02X", readBuff[8], readBuff[9]); 
     }
 
-    { //Get PHONE numbers:
-        const unsigned char msg[] = VMSG_DL_PHONENRS;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
-        for(int iCnt=0; iCnt<4; iCnt++)
-        {
-            for(int jCnt=0; jCnt<=7; jCnt++)
-            {
-                if(readBuff[8 * iCnt + jCnt] != 0xFF)
-                {
-                    char szTwoDigits[10] = "";
-                    sprintf(szTwoDigits, "%02X", readBuff[8 * iCnt + jCnt]);
-                    if(szTwoDigits[1] == 'F')
-                    {
-                        szTwoDigits[1] = '\0';
-                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
-                        break;
-                    }
-                    else
-                    {
-                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
-                    }
-                }
-            }
-        }
-    }
+
 }
 
 void PowerMaxAlarm::PmaxAck(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
@@ -1548,18 +1624,13 @@ void PowerMaxAlarm::handlePacket(PlinkBuffer* commandBuffer) {
 
 const char* PowerMaxAlarm::getZoneName(unsigned char zoneId)
 {
-    int count = os_cfg_getZoneCnt();
-    if(zoneId < count)
+    if(zoneId < MAX_ZONE_COUNT &&
+       zone[zoneId].enrolled)
     {
-        return os_cfg_getZoneName(zoneId);
+        return zone[zoneId].name;
     }
-    
-    return GetStrPmaxDefaultZoneNames(zoneId);
-}
 
-const char* Zone::getName() const
-{
-    return PowerMaxAlarm::getZoneName(id);
+    return "Unknown";
 }
 
 void ConsoleOutput::write(const char* str)
@@ -1619,8 +1690,11 @@ void Zone::DumpToJson(IOutput* outputStream)
 {
     outputStream->write("{");
     {
-        outputStream->writeJsonTag("id", id);
-        outputStream->writeJsonTag("id_str", getName());
+        outputStream->writeJsonTag("name", name);
+        outputStream->writeJsonTag("zonetype", zonetype);
+        outputStream->writeJsonTag("sensorid", sensorid);
+        outputStream->writeJsonTag("sensortype", sensortype);
+        outputStream->writeJsonTag("autocreate", autocreate);
         
         if(lastEventTime > 0)
         {
