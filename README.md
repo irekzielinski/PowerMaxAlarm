@@ -65,3 +65,9 @@ Getting started:
 * On PowerMax Complete that's all you need to do, on other board you might need to perform manual powerlink enrolment
 * Find IP address of your ESP.
 * Connect to this IP with telnet or web browser.
+
+
+***
+** Credits:
+* Various posts on: http://www.domoticaforum.eu/viewforum.php?f=68
+* Implementation of PMAX library directly based on this file form DomotiGa3 project: https://github.com/DomotiGa/DomotiGa/blob/master/DomotiGa3/.src/CVisonic.class
