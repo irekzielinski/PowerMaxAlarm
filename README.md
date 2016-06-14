@@ -1,5 +1,7 @@
-Generic C++ library for Visonic PowerMax alarms, with number of projects that use it.
-This allows to monitor and control your alarm (via wired or WiFi link).
+ # PowerMaxAlarm
+
+ # Generic C++ library for Visonic PowerMax alarms, with number of projects that use it.
+ # This allows to monitor and control your alarm (via wired or WiFi link).
 
 This project is separate into following parts:
 - Generic C++ library (called PMAX) that you can use to interface with PowerMax alarms.
