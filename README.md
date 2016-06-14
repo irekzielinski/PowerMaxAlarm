@@ -52,7 +52,7 @@ You can modify ESP8266 code according to your needs (maybe push data to external
 
 For this project I recommend to use WeMos D1 board (full size, not mini):
 * D1 operates on 3.3V which is compatible with PM RS232 interface.
-* D1 has a DC jack that can accept 12V power that is available inside PM alarms (ground to the outside, 12V+ to the centre pin).
+* D1 has a DC jack that can accept 12V power that is available inside PM alarms .
 * Size of the board allows to fit it inside PM alarm (tested with PowerMax Complete)
 * D1 allows Over-The-Air (WiFi) firmware updates, so you don't need to open the alarm to update the firmware.
     
@@ -61,7 +61,7 @@ Getting started:
 * Connect it first to the PC, and flash PowerMaxEsp8266 project using [Arduino IDE](http://www.wemos.cc/tutorial/get_started_in_arduino.html).
 * Connect WeMos to PowerMax RS232 port:
   ![Wemos pinout](https://github.com/irekzielinski/PowerMaxAlarm/blob/master/doc/WemosPowerMax.png?raw=true)
-* Connect 12V power from alarm to DC input in WeMos D1
+* Connect 12V power from alarm to DC input in WeMos D1 (ground to the outside, 12V+ to the centre pin).
 * On PowerMax Complete that's all you need to do, on other board you might need to perform manual powerlink enrolment
-* Find IP address of your ESP
-* Connect to this IP with telnet or web browser
+* Find IP address of your ESP.
+* Connect to this IP with telnet or web browser.
