@@ -95,7 +95,7 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
     }
     else if ( c == 'j' ) {
         ConsoleOutput out;
-        pm->DumpToJson(&out);
+        pm->dumpToJson(&out);
     }
     else if ( c == '?' )
     {
@@ -159,7 +159,7 @@ int _tmain(int argc, _TCHAR* argv[])
     }
 
     PowerMaxAlarm pm;
-    pm.Init();
+    pm.init();
 
 
 	log_console_setlogmask(LOG_INFO);
@@ -175,7 +175,7 @@ int _tmain(int argc, _TCHAR* argv[])
         
         if(GetTickCount() - dwLastMsg > 300)
         {
-            pm.SendNextCommand();
+            pm.sendNextCommand();
         }
 
 

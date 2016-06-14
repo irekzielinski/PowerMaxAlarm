@@ -108,7 +108,7 @@ struct PlinkCommand {
     unsigned char buffer[MAX_SEND_BUFFER_SIZE];
     int size;
     const char* description;
-    void (*action)(PowerMaxAlarm* pm, const struct PlinkBuffer *);
+    void (PowerMaxAlarm::*action)(const struct PlinkBuffer *);
 };
 
 struct PlinkBuffer {
@@ -192,8 +192,12 @@ struct PmConfig
     int GetMasterPinAsHex() const;
 };
 
+//NOTE: if you want to add some new functionality (like MQTT support), don't modify this class.
+//Rather than: derive from this class, and override one of the virtual functions.
+//This class should contain only code to comminicate with PowerMax alarms.
 class PowerMaxAlarm
 {
+protected:
     //Flags with[*] are one-shot notifications of last event
     //For example when user arms away - bit 6 will be set
     //When system will deliver 'last 10 sec' notification - bit 6 will be cleared
@@ -237,12 +241,8 @@ class PowerMaxAlarm
     unsigned long m_ulLastPing;
 public:
 
-#ifdef _MSC_VER
-    void IZIZTODO_testMap();
-#endif
-
-    void Init();
-    void SendNextCommand();
+    void init();
+    void sendNextCommand();
     void clearQueue(){ m_sendQueue.clear(); }
     
     bool sendCommand(PmaxCommand cmd);
@@ -253,49 +253,53 @@ public:
 
     unsigned int getEnrolledZoneCnt() const;
     unsigned long getSecondsFromLastComm() const;
-    void DumpToJson(IOutput* outputStream);
+    void dumpToJson(IOutput* outputStream);
 
-private:
+#ifdef _MSC_VER
+    void IZIZTODO_testMap();
+#endif
+
+    //override thise function in derived class to handle notifications
+    virtual void OnStatusUpdateZoneBat(const PlinkBuffer  * Buff);
+    virtual void OnStatusUpdatePanel(const PlinkBuffer  * Buff);
+    virtual void OnStatusUpdateZoneBypassed(const PlinkBuffer  * Buff);
+    virtual void OnStatusUpdateZoneTamper(const PlinkBuffer  * Buff);
+    virtual void OnStatusChange(const PlinkBuffer  * Buff);
+    virtual void OnStatusUpdate(const PlinkBuffer  * Buff);
+    virtual void OnEventLog(const PlinkBuffer  * Buff);
+    virtual void OnAccessDenied(const PlinkBuffer  * Bufff);
+    virtual void OnAck(const PlinkBuffer  * Buff);
+    virtual void OnTimeOut(const PlinkBuffer  * Buff);
+    virtual void OnStop(const PlinkBuffer  * Buff);
+    virtual void OnEnroll(const PlinkBuffer  * Buff);
+    virtual void OnPing(const PlinkBuffer  * Buff);
+    virtual void OnPanelInfo(const PlinkBuffer  * Buff);
+    virtual void OnDownloadInfo(const PlinkBuffer  * Buff);
+    virtual void OnDownloadSettings(const PlinkBuffer  * Buff);
+
+protected:
     void addPin(unsigned char* bufferToSend, int pos = 4, bool useMasterCode = false);
 
     bool isFlagSet(unsigned char id) const { return (flags & 1<<id) != 0; }
     bool isAlarmEvent() const{  return isFlagSet(7); }
     bool isZoneEvent()  const{  return isFlagSet(5); }
 
-    void Format_SystemStatus(char* tpbuff, int buffSize);
+    void format_SystemStatus(char* tpbuff, int buffSize);
 
     //buffer is coppied, description and options need to be in pernament addressess (not something from stack)
-    bool QueueCommand(const unsigned char* buffer, int bufferLen, const char* description, unsigned char expectedRepply = 0x00, const char* options = NULL);
-    void PowerLinkEnrolled();
-    void ProcessSettings();
+    bool queueCommand(const unsigned char* buffer, int bufferLen, const char* description, unsigned char expectedRepply = 0x00, const char* options = NULL);
+    void powerLinkEnrolled();
+    void processSettings();
 
-    int ReadMemoryMap(const unsigned char* msg, unsigned char* buffOut, int buffOutSize);
-    void WriteMemoryMap(int iPage, int iIndex, const unsigned char* sData, int sDataLen);
+    int readMemoryMap(const unsigned char* msg, unsigned char* buffOut, int buffOutSize);
+    void writeMemoryMap(int iPage, int iIndex, const unsigned char* sData, int sDataLen);
 
     bool sendBuffer(const unsigned char * data, int bufferSize);
     void sendBuffer(struct PlinkBuffer * Buff);
     static PmAckType calculateAckType(const unsigned char* deformattedBuffer, int bufferLen);
 
-    void StartKeepAliveTimer();
-    void StopKeepAliveTimer();
-
-public:
-    static void PmaxStatusUpdateZoneBat(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxStatusUpdatePanel(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxStatusUpdateZoneBypassed(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxStatusUpdateZoneTamper(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxStatusChange(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxStatusUpdate(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxEventLog(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxAccessDenied(PowerMaxAlarm* pm, const PlinkBuffer  * Bufff);
-    static void PmaxAck(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxTimeOut(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxStop(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxEnroll(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxPing(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxPanelInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxDownloadInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
-    static void PmaxDownloadSettings(PowerMaxAlarm* pm, const PlinkBuffer  * Buff);
+    void startKeepAliveTimer();
+    void stopKeepAliveTimer();
 };
 
 /* This section specifies OS specific functions. */

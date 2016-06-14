@@ -126,7 +126,7 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
     case Pmax_GETEVENTLOG:
         {
             unsigned char buff[] = {0xA0,0x00,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
-            return QueueCommand(buff, sizeof(buff), "Pmax_GETEVENTLOG", 0xA0, "PIN:MasterCode:4");
+            return queueCommand(buff, sizeof(buff), "Pmax_GETEVENTLOG", 0xA0, "PIN:MasterCode:4");
         }
 
     case Pmax_DISARM:
@@ -188,19 +188,19 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
             m_bDownloadMode = false;
 
             unsigned char buff[] = {0xAB,0x0A,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff);
-            return QueueCommand(buff, sizeof(buff), "Pmax_ENROLLREPLY");
+            return queueCommand(buff, sizeof(buff), "Pmax_ENROLLREPLY");
         }
 
     case Pmax_RESTORE:
         {
             unsigned char buff[] = {0xAB,0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x43};
-            return QueueCommand(buff, sizeof(buff), "Pmax_RESTORE");
+            return queueCommand(buff, sizeof(buff), "Pmax_RESTORE");
         }
 
     case Pmax_INIT:
         {
             unsigned char buff[] = {0xAB,0x0A,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x43};
-            return QueueCommand(buff, sizeof(buff), "Pmax_INIT");
+            return queueCommand(buff, sizeof(buff), "Pmax_INIT");
         }
 
     // ### PowerMax download/config items (some apply to PowerMaster too) ###
@@ -217,31 +217,31 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
     case Pmax_DL_PANELFW:
         {
             unsigned char buff[] = {0x3E, 0x00, 0x04, 0x20, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00};
-            return QueueCommand(buff, sizeof(buff), "Pmax_DL_PANELFW", 0x3F);
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_PANELFW", 0x3F);
         }
 
     case Pmax_DL_SERIAL:
         {
             unsigned char buff[] = {0x3E, 0x30, 0x04, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00};
-            return QueueCommand(buff, sizeof(buff), "Pmax_DL_SERIAL", 0x3F);
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_SERIAL", 0x3F);
         }
 
    case Pmax_DL_ZONESTR:
         {
             unsigned char buff[] = {0x3E, 0x00, 0x19, 0x00, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00};
-            return QueueCommand(buff, sizeof(buff), "Pmax_DL_ZONESTR", 0x3F);
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_ZONESTR", 0x3F);
         }
 
    case Pmax_DL_GET:
         {
             unsigned char buff[] = {0x0A};
-            return QueueCommand(buff, sizeof(buff), "Pmax_DL_GET", 0x33);
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_GET", 0x33);
         }
 
     case Pmax_DL_START: //start download (0x3C - DownloadCode: 3 & 4)
         {
             unsigned char buff[] = {0x24,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; addPin(buff, 3);
-            return QueueCommand(buff, sizeof(buff), "Pmax_DL_START", 0x3C, "PIN:DownloadCode:3");
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_START", 0x3C, "PIN:DownloadCode:3");
 
             if(m_bDownloadMode == false)
             {
@@ -256,7 +256,7 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
     case Pmax_DL_EXIT: //stop download
         {
             unsigned char buff[] = {0x0F};
-            return QueueCommand(buff, sizeof(buff), "Pmax_DL_EXIT");
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_EXIT");
 
             if(m_bDownloadMode)
             {
@@ -277,23 +277,23 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
 //FF means: match anything
 struct PlinkCommand PmaxCommand[] =
 {
-    {{0x08                                                       },1  ,"Access denied"              ,&PowerMaxAlarm::PmaxAccessDenied},
-    {{0x08,0x43                                                  },2  ,"Access denied 2"            ,&PowerMaxAlarm::PmaxAccessDenied},
-    {{0xA0,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Event Log"                  ,&PowerMaxAlarm::PmaxEventLog},
-    {{0xA5,0xFF,0x02,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Zone Battery" ,&PowerMaxAlarm::PmaxStatusUpdateZoneBat},
-    {{0xA5,0xFF,0x03,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Zone tamper"  ,&PowerMaxAlarm::PmaxStatusUpdateZoneTamper},
-    {{0xA5,0xFF,0x04,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Panel"        ,&PowerMaxAlarm::PmaxStatusUpdatePanel},
-    {{0xA5,0xFF,0x06,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Zone Bypassed",&PowerMaxAlarm::PmaxStatusUpdateZoneBypassed},
-    {{0xA7,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Panel status change"        ,&PowerMaxAlarm::PmaxStatusChange},
-    {{0xAB,0x0A,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x43},12 ,"Enroll request"             ,&PowerMaxAlarm::PmaxEnroll},
-    {{0xAB,0x03,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Ping"                       ,&PowerMaxAlarm::PmaxPing},
-    {{0x3C,0xFD,0x0A,0x00,0x00,0x0E,0x05,0x01,0x00,0x00,0x00     },11, "Panel Info"                 ,&PowerMaxAlarm::PmaxPanelInfo},
-    {{0x3F,0xFF,0xFF,0xFF                                        },-4, "Download Info"              ,&PowerMaxAlarm::PmaxDownloadInfo}, //-4 means: size>=4, len can differ
-    {{0x33,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF     },11, "Download Settings"          ,&PowerMaxAlarm::PmaxDownloadSettings},
-    {{0x02,0x43                                                  },2  ,"Acknowledgement"            ,&PowerMaxAlarm::PmaxAck},
-    {{0x02,                                                      },1  ,"Acknowledgement 2"          ,&PowerMaxAlarm::PmaxAck},
-	{{0x06                                                       },1  ,"Time Out"                   ,&PowerMaxAlarm::PmaxTimeOut},
-    {{0x0B                                                       },1  ,"Stop (Dload Complete)"      ,&PowerMaxAlarm::PmaxStop} 
+    {{0x08                                                       },1  ,"Access denied"              ,&PowerMaxAlarm::OnAccessDenied},
+    {{0x08,0x43                                                  },2  ,"Access denied 2"            ,&PowerMaxAlarm::OnAccessDenied},
+    {{0xA0,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Event Log"                  ,&PowerMaxAlarm::OnEventLog},
+    {{0xA5,0xFF,0x02,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Zone Battery" ,&PowerMaxAlarm::OnStatusUpdateZoneBat},
+    {{0xA5,0xFF,0x03,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Zone tamper"  ,&PowerMaxAlarm::OnStatusUpdateZoneTamper},
+    {{0xA5,0xFF,0x04,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Panel"        ,&PowerMaxAlarm::OnStatusUpdatePanel},
+    {{0xA5,0xFF,0x06,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Status Update Zone Bypassed",&PowerMaxAlarm::OnStatusUpdateZoneBypassed},
+    {{0xA7,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Panel status change"        ,&PowerMaxAlarm::OnStatusChange},
+    {{0xAB,0x0A,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x43},12 ,"Enroll request"             ,&PowerMaxAlarm::OnEnroll},
+    {{0xAB,0x03,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Ping"                       ,&PowerMaxAlarm::OnPing},
+    {{0x3C,0xFD,0x0A,0x00,0x00,0x0E,0x05,0x01,0x00,0x00,0x00     },11, "Panel Info"                 ,&PowerMaxAlarm::OnPanelInfo},
+    {{0x3F,0xFF,0xFF,0xFF                                        },-4, "Download Info"              ,&PowerMaxAlarm::OnDownloadInfo}, //-4 means: size>=4, len can differ
+    {{0x33,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF     },11, "Download Settings"          ,&PowerMaxAlarm::OnDownloadSettings},
+    {{0x02,0x43                                                  },2  ,"Acknowledgement"            ,&PowerMaxAlarm::OnAck},
+    {{0x02,                                                      },1  ,"Acknowledgement 2"          ,&PowerMaxAlarm::OnAck},
+	{{0x06                                                       },1  ,"Time Out"                   ,&PowerMaxAlarm::OnTimeOut},
+    {{0x0B                                                       },1  ,"Stop (Dload Complete)"      ,&PowerMaxAlarm::OnStop} 
 }; 
 
 const char* PmaxSystemStatus[] = {
@@ -482,7 +482,7 @@ IMPEMENT_GET_FUNCTION(PmaxZoneEventTypes);
 IMPEMENT_GET_FUNCTION(PmaxLogEvents);
 IMPEMENT_GET_FUNCTION(PmaxPanelType);
 
-void PowerMaxAlarm::Init() {
+void PowerMaxAlarm::init() {
 
     memset(&m_lastSentCommand, 0, sizeof(m_lastSentCommand));
     m_bEnrolCompleted = false;
@@ -536,19 +536,19 @@ void PowerMaxAlarm::addPin(unsigned char* bufferToSend, int pos, bool useMasterC
     bufferToSend[pos+1]=pin & 0x00FF ;
 }
 
-void PowerMaxAlarm::PmaxEnroll(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnEnroll(const PlinkBuffer  * Buff)
 {
     //Remove anything else from the queue, we need to restart
-    pm->clearQueue();
-    pm->sendCommand(Pmax_ENROLLREPLY);
+    this->clearQueue();
+    this->sendCommand(Pmax_ENROLLREPLY);
     DEBUG(LOG_INFO,"Enrolling.....");
 
     //if we're doing enroll, most likely first call to download failed, re-try now, after enrolment is done:
-    pm->sendCommand(Pmax_DL_START);
+    this->sendCommand(Pmax_DL_START);
 }
 
 //Should be called when panel is enrolled and entered download mode successfully
-void PowerMaxAlarm::PowerLinkEnrolled()
+void PowerMaxAlarm::powerLinkEnrolled()
 {
     m_bEnrolCompleted = true;
 
@@ -589,28 +589,28 @@ void PowerMaxAlarm::PowerLinkEnrolled()
     if(m_bPowerMaster == false)
     {
         //IZIZTOOD: uncomment:
-        //pm->sendCommand(Pmax_GETEVENTLOG);
+        //this->sendCommand(Pmax_GETEVENTLOG);
     }
 }
 
 //Direct message after we do a download start. Contains the paneltype information
-void PowerMaxAlarm::PmaxPanelInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnPanelInfo(const PlinkBuffer  * Buff)
 {
     // The panel information is in 5 & 6
     // 6=PanelType e.g. PowerMax, PowerMaster
     // 5=Sub model type of the panel - just informational
-    pm->m_iPanelType = Buff->buffer[6];
-    pm->m_iModelType = Buff->buffer[5];
-    pm->m_bPowerMaster =  (pm->m_iPanelType >= 7);
-    pm->sendCommand(Pmax_ACK);
+    this->m_iPanelType = Buff->buffer[6];
+    this->m_iModelType = Buff->buffer[5];
+    this->m_bPowerMaster =  (this->m_iPanelType >= 7);
+    this->sendCommand(Pmax_ACK);
 
-    DEBUG(LOG_INFO,"Received Panel Info. PanelType: %s, Model=%d (0x%X)", GetStrPmaxPanelType(pm->m_iPanelType),  pm->m_iModelType, (pm->m_iPanelType * 0x100 + pm->m_iModelType));
+    DEBUG(LOG_INFO,"Received Panel Info. PanelType: %s, Model=%d (0x%X)", GetStrPmaxPanelType(this->m_iPanelType),  this->m_iModelType, (this->m_iPanelType * 0x100 + this->m_iModelType));
 
     //We got a first response, now we can continue enrollment the PowerMax/Master PowerLink
-    pm->PowerLinkEnrolled();
+    this->powerLinkEnrolled();
 }
 
-int PowerMaxAlarm::ReadMemoryMap(const unsigned char* sData, unsigned char* buffOut, int buffOutSize)
+int PowerMaxAlarm::readMemoryMap(const unsigned char* sData, unsigned char* buffOut, int buffOutSize)
 {
     //The aMsg is in the regular download format, ignore the SubType and only use page, index and length
     //NOTE: Length can be more then &HFF bytes, in such we got multiple 3F responses with a "real" download
@@ -620,7 +620,7 @@ int PowerMaxAlarm::ReadMemoryMap(const unsigned char* sData, unsigned char* buff
 
     if(iLength > buffOutSize)
     {
-        DEBUG(LOG_ERR, "ReadMemoryMap, buffer too small, needed: %d, got: %d", iLength, buffOutSize);
+        DEBUG(LOG_ERR, "readMemoryMap, buffer too small, needed: %d, got: %d", iLength, buffOutSize);
         return 0;
     }
 
@@ -640,7 +640,7 @@ int PowerMaxAlarm::ReadMemoryMap(const unsigned char* sData, unsigned char* buff
 
 //Write the 3C and 3F information into our own memory map structure. This contains all the
 //information of the PowerMax/Master and will later be processed in ReadSettings
-void PowerMaxAlarm::WriteMemoryMap(int iPage, int iIndex, const unsigned char* sData, int sDataLen)
+void PowerMaxAlarm::writeMemoryMap(int iPage, int iIndex, const unsigned char* sData, int sDataLen)
 {
     MemoryMap* pMap = &m_mapMain;
     if(iPage == 0xFF && iIndex == 0xFF)
@@ -665,9 +665,9 @@ void PowerMaxAlarm::WriteMemoryMap(int iPage, int iIndex, const unsigned char* s
 
 //MsgType=3F - Download information
 //Multiple 3F can follow eachother, if we request more then 0xFF bytes
-void PowerMaxAlarm::PmaxDownloadInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnDownloadInfo(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
 
     //Format is normally: <MsgType> <index> <page> <length> <data ...>
     //If the <index> <page> = FF, then it is an additional PowerMaster MemoryMap
@@ -682,48 +682,48 @@ void PowerMaxAlarm::PmaxDownloadInfo(PowerMaxAlarm* pm, const PlinkBuffer  * Buf
     }
 
     //Write to memory map structure, but remove the first 4 bytes (3F/index/page/length) from the data
-    pm->WriteMemoryMap(iPage, iIndex, Buff->buffer+4, Buff->size-4);
+    this->writeMemoryMap(iPage, iIndex, Buff->buffer+4, Buff->size-4);
 }
 
 //MsgType=33 - Settings
 // Message send after a DL_GET. We will store the information in an internal array/collection
-void PowerMaxAlarm::PmaxDownloadSettings(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnDownloadSettings(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
 
     //Format is: <MsgType> <index> <page> <data 8x bytes>
     int iIndex  = Buff->buffer[1];
     int iPage   = Buff->buffer[2];
 
     //Write to memory map structure, but remove the first 3 bytes from the data
-    pm->WriteMemoryMap(iPage, iIndex, Buff->buffer+3, Buff->size-3);
+    this->writeMemoryMap(iPage, iIndex, Buff->buffer+3, Buff->size-3);
 }
 
 //This one happens after all items requested by DLOAD_Get has been sent by PM
-void PowerMaxAlarm::PmaxStop(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnStop(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);   
+    this->sendCommand(Pmax_ACK);   
     DEBUG(LOG_INFO,"Stop (Dload complete)"); 
 }
 
-void PowerMaxAlarm::StartKeepAliveTimer()
+void PowerMaxAlarm::startKeepAliveTimer()
 {
     //IZIZTODO:
 }
 
-void PowerMaxAlarm::StopKeepAliveTimer()
+void PowerMaxAlarm::stopKeepAliveTimer()
 {
     //IZIZTODO:
 }
 
-void PowerMaxAlarm::PmaxPing(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnPing(const PlinkBuffer  * Buff)
 {
-    pm->m_bDownloadMode = false; //ping never happens in download mode
-    pm->sendCommand(Pmax_ACK);
+    this->m_bDownloadMode = false; //ping never happens in download mode
+    this->sendCommand(Pmax_ACK);
     DEBUG(LOG_INFO,"Ping.....");
 
     //re-starting keep alive timer
-    pm->StartKeepAliveTimer();
+    this->startKeepAliveTimer();
 }
 
 #ifdef _MSC_VER
@@ -735,7 +735,7 @@ void PowerMaxAlarm::IZIZTODO_testMap()
     m_iPanelType = 5;
     m_bPowerMaster = false;
     loadMapToFile("main.map", &m_mapMain);
-    ProcessSettings();
+    processSettings();
 
     ConsoleOutput c;
     m_cfg.DumpToJson(&c);
@@ -802,7 +802,7 @@ int PmConfig::GetMasterPinAsHex() const
     return strtol(userPins[0], NULL, 16);
 }
 
-void PowerMaxAlarm::ProcessSettings()
+void PowerMaxAlarm::processSettings()
 {
     m_cfg.Init();
     
@@ -823,7 +823,7 @@ void PowerMaxAlarm::ProcessSettings()
     //Read serialnumber and paneltype info, and some sanity check
     {
         const unsigned char msg[] = VMSG_DL_SERIAL;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         if(readCnt < 8)
         {
             DEBUG(LOG_WARNING,"ERROR: Can't read the PowerMax/Master MemoryMap, communication with the unit went wrong?");
@@ -871,7 +871,7 @@ void PowerMaxAlarm::ProcessSettings()
 
     { //Read panel eprom and software info
         const unsigned char msg[] = VMSG_DL_PANELFW;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         if(readCnt >=  16) strncpy(m_cfg.eprom, (const char*)readBuff, sizeof(m_cfg.eprom)-1);
         if(readCnt >=  32) sprintf(m_cfg.software, (const char*)readBuff+16, sizeof(m_cfg.software)-1); 
     }
@@ -881,7 +881,7 @@ void PowerMaxAlarm::ProcessSettings()
 
     { //Determine the zone names, including the custom ones.
         const unsigned char msg[] = VMSG_DL_ZONESTR;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         if(readCnt == 0)
         {
             DEBUG(LOG_WARNING,"ERROR: Failed to read zone names, possibly data not downloaded, or supplied buffer too small");
@@ -904,7 +904,7 @@ void PowerMaxAlarm::ProcessSettings()
 
     { //Get PHONE numbers:
         const unsigned char msg[] = VMSG_DL_PHONENRS;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         for(int iCnt=0; iCnt<4; iCnt++)
         {
             for(int jCnt=0; jCnt<=7; jCnt++)
@@ -930,7 +930,7 @@ void PowerMaxAlarm::ProcessSettings()
 
     { //Alarm settings
         const unsigned char msg[] = VMSG_DL_COMMDEF;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         if(readCnt < 30)
         {
             DEBUG(LOG_WARNING,"ERROR: Failed to read alarm settings");
@@ -959,7 +959,7 @@ void PowerMaxAlarm::ProcessSettings()
     if(m_cfg.maxPartitionCnt > 0)
     { //Retrieve if partitioning is enabled
             const unsigned char msg[] = VMSG_DL_PARTITIONS;
-            const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+            const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
             if(readCnt > 0)
             {
                 if(readBuff[0] == 0)
@@ -973,7 +973,7 @@ void PowerMaxAlarm::ProcessSettings()
         unsigned char masterReadBuff[128] = {0};
 
         const unsigned char msg[] = VMSG_DL_ZONES;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         if(readCnt < 120)
         {
             DEBUG(LOG_WARNING,"ERROR: Failed to read zone settings");
@@ -986,15 +986,15 @@ void PowerMaxAlarm::ProcessSettings()
             if(m_bPowerMaster)
             {
                 const unsigned char msg[] = VMSG_DL_MASTER_ZONENAMES;
-                zoneNameIdxCnt = ReadMemoryMap(msg, zoneNamesIndexes, sizeof(zoneNamesIndexes));
+                zoneNameIdxCnt = readMemoryMap(msg, zoneNamesIndexes, sizeof(zoneNamesIndexes));
 
                 const unsigned char msg2[] = VMSG_DL_MASTER_ZONES;
-                ReadMemoryMap(msg2, masterReadBuff, sizeof(masterReadBuff));
+                readMemoryMap(msg2, masterReadBuff, sizeof(masterReadBuff));
             }
             else
             {
                 const unsigned char msg[] = VMSG_DL_ZONENAMES;
-                zoneNameIdxCnt = ReadMemoryMap(msg, zoneNamesIndexes, sizeof(zoneNamesIndexes));
+                zoneNameIdxCnt = readMemoryMap(msg, zoneNamesIndexes, sizeof(zoneNamesIndexes));
                 if(zoneNameIdxCnt != sizeof(zoneNamesIndexes))
                 {
                     DEBUG(LOG_WARNING,"ERROR: Failed to read zone name indexes");
@@ -1097,12 +1097,12 @@ void PowerMaxAlarm::ProcessSettings()
         if(m_bPowerMaster)
         {
             const unsigned char msg[] = VMSG_DL_MASTER_USERPINCODES;
-            readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+            readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         }
         else
         {
             const unsigned char msg[] = VMSG_DL_USERPINCODES;
-            readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+            readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         }
 
         if(readCnt != m_cfg.maxUserCnt*2)
@@ -1120,7 +1120,7 @@ void PowerMaxAlarm::ProcessSettings()
 
     { //Retrieve the installer and powerlink pincodes - they are known/visible
         const unsigned char msg[] = VMSG_DL_OTHERPINCODES;
-        const int readCnt = ReadMemoryMap(msg, readBuff, sizeof(readBuff));
+        const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         if(readCnt >=  2) sprintf(m_cfg.installerPin,       "%02X%02X", readBuff[0], readBuff[1]);
         if(readCnt >=  4) sprintf(m_cfg.masterInstallerPin, "%02X%02X", readBuff[2], readBuff[3]); 
         if(readCnt >= 10) sprintf(m_cfg.powerLinkPin,       "%02X%02X", readBuff[8], readBuff[9]); 
@@ -1129,59 +1129,59 @@ void PowerMaxAlarm::ProcessSettings()
 
 }
 
-void PowerMaxAlarm::PmaxAck(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnAck(const PlinkBuffer  * Buff)
 {
-    if(pm->m_lastSentCommand.size == 1 &&
-       pm->m_lastSentCommand.buffer[0] == 0x0F) //Pmax_DL_EXIT
+    if(this->m_lastSentCommand.size == 1 &&
+       this->m_lastSentCommand.buffer[0] == 0x0F) //Pmax_DL_EXIT
     {
         //we got an ack for exit from dload mode:
-        pm->m_bDownloadMode = false;
+        this->m_bDownloadMode = false;
 
         //this will be false for the first Pmax_DL_EXIT that is called from Init()
-        if(pm->m_bEnrolCompleted)
+        if(this->m_bEnrolCompleted)
         {
 #ifdef _MSC_VER
-            saveMapToFile("main.map", &pm->m_mapMain);
-            saveMapToFile("ext.map", &pm->m_mapExtended);
+            saveMapToFile("main.map", &this->m_mapMain);
+            saveMapToFile("ext.map", &this->m_mapExtended);
 #endif
 
-            pm->ProcessSettings();
+            this->processSettings();
 
             //after download is complete, we call restore - this will get other important settings, and make sure panel is happy with comms
-            pm->sendCommand(Pmax_RESTORE);
+            this->sendCommand(Pmax_RESTORE);
         }
 
         //re-starting keep alive timer
-        pm->StartKeepAliveTimer();
+        this->startKeepAliveTimer();
     }
 }
 
 //Timeout message from the PM, most likely we are/were in download mode
-void PowerMaxAlarm::PmaxTimeOut(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnTimeOut(const PlinkBuffer  * Buff)
 {
-    if(pm->m_bDownloadMode)
+    if(this->m_bDownloadMode)
     {
-        pm->sendCommand(Pmax_DL_EXIT); 
+        this->sendCommand(Pmax_DL_EXIT); 
     }
     else
     {
-        pm->sendCommand(Pmax_ACK);
+        this->sendCommand(Pmax_ACK);
     }
 
     DEBUG(LOG_INFO,"Time Out"); 
 }
 
-void PowerMaxAlarm::PmaxAccessDenied(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnAccessDenied(const PlinkBuffer  * Buff)
 {
     DEBUG(LOG_INFO,"Access denied");
 }
 
-void PowerMaxAlarm::PmaxEventLog(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnEventLog(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);   
+    this->sendCommand(Pmax_ACK);   
 
     const unsigned char zoneId = Buff->buffer[9];
-    const char* tpzone = pm->getZoneName(zoneId);
+    const char* tpzone = this->getZoneName(zoneId);
 
     char logline[MAX_BUFFER_SIZE] = "";
     sprintf(logline,"event number:%d/%d at %d:%d:%d %d/%d/%d %s:%s",
@@ -1194,22 +1194,22 @@ void PowerMaxAlarm::PmaxEventLog(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
     DEBUG(LOG_NOTICE,"event log:%s",logline);
 }
 
-void PowerMaxAlarm::PmaxStatusUpdate(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnStatusUpdate(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);   
+    this->sendCommand(Pmax_ACK);   
     DEBUG(LOG_INFO,"pmax status update")   ;
 }
 
-void PowerMaxAlarm::PmaxStatusChange(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnStatusChange(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
     unsigned char zoneID = Buff->buffer[3];
-    DEBUG(LOG_INFO,"PmaxStatusChange %s %s",pm->getZoneName(zoneID),GetStrPmaxLogEvents(Buff->buffer[4])); 
+    DEBUG(LOG_INFO,"PmaxStatusChange %s %s",this->getZoneName(zoneID),GetStrPmaxLogEvents(Buff->buffer[4])); 
 }
 
-void PowerMaxAlarm::PmaxStatusUpdateZoneTamper(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnStatusUpdateZoneTamper(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
     DEBUG(LOG_INFO,"Status Update : Zone active/tampered");
 
     const unsigned char * ZoneBuffer = Buff->buffer+3;
@@ -1220,11 +1220,11 @@ void PowerMaxAlarm::PmaxStatusUpdateZoneTamper(PowerMaxAlarm* pm, const PlinkBuf
         if (ZoneBuffer[byte] & 1<<offset)
         { 
             DEBUG(LOG_INFO,"Zone %d is NOT active",i ); 
-            pm->zone[i].stat.active=false;
+            this->zone[i].stat.active=false;
         }
         else
         {
-            pm->zone[i].stat.active=true;
+            this->zone[i].stat.active=true;
         }
     }
 
@@ -1236,18 +1236,18 @@ void PowerMaxAlarm::PmaxStatusUpdateZoneTamper(PowerMaxAlarm* pm, const PlinkBuf
         if (ZoneBuffer[byte] & 1<<offset)
         {
             DEBUG(LOG_INFO,"Zone %d is tampered",i );
-            pm->zone[i].stat.tamper=true;
+            this->zone[i].stat.tamper=true;
         }
         else
         {
-            pm->zone[i].stat.tamper=false;    
+            this->zone[i].stat.tamper=false;    
         }      
     } 
 }
 
-void PowerMaxAlarm::PmaxStatusUpdateZoneBypassed(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnStatusUpdateZoneBypassed(const PlinkBuffer  * Buff)
 {  
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
     DEBUG(LOG_INFO,"Status Update : Zone Enrolled/Bypassed");
 
     const unsigned char * ZoneBuffer = Buff->buffer+3;
@@ -1258,11 +1258,11 @@ void PowerMaxAlarm::PmaxStatusUpdateZoneBypassed(PowerMaxAlarm* pm, const PlinkB
         if (ZoneBuffer[byte] & 1<<offset)
         {
             DEBUG(LOG_INFO,"Zone %d is enrolled",i );
-            pm->zone[i].enrolled = true;
+            this->zone[i].enrolled = true;
         }
         else
         {
-            pm->zone[i].enrolled = false;
+            this->zone[i].enrolled = false;
         }
     }
 
@@ -1273,28 +1273,28 @@ void PowerMaxAlarm::PmaxStatusUpdateZoneBypassed(PowerMaxAlarm* pm, const PlinkB
         int offset=(i-1)%8;
         if (ZoneBuffer[byte] & 1<<offset) {
             DEBUG(LOG_INFO,"Zone %d is bypassed",i );
-            pm->zone[i].stat.bypased=true;
+            this->zone[i].stat.bypased=true;
         }
         else {
-            pm->zone[i].stat.bypased=false;
+            this->zone[i].stat.bypased=false;
         }       
     }
 }
 
 //0xA5,XX,0x04
-void PowerMaxAlarm::PmaxStatusUpdatePanel(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)    
+void PowerMaxAlarm::OnStatusUpdatePanel(const PlinkBuffer  * Buff)    
 {
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
 
-    pm->stat  = (SystemStatus)Buff->buffer[3];
-    pm->flags = Buff->buffer[4];
+    this->stat  = (SystemStatus)Buff->buffer[3];
+    this->flags = Buff->buffer[4];
 
     {
         char tpbuff[MAX_BUFFER_SIZE] = "";  //IZIZTODO: remove this, output directly to console
-        sprintf(tpbuff,"System status: %s, Flags :", GetStrPmaxSystemStatus(pm->stat));    
+        sprintf(tpbuff,"System status: %s, Flags :", GetStrPmaxSystemStatus(this->stat));    
         for (int i=0;i<8;i++) //loop trough all 8 bits
         {
-            if (pm->flags & 1<<i) {
+            if (this->flags & 1<<i) {
                 os_strncat_s(tpbuff, MAX_BUFFER_SIZE, " ");
                 os_strncat_s(tpbuff, MAX_BUFFER_SIZE, GetStrSystemStateFlags(i));
             }      
@@ -1303,45 +1303,45 @@ void PowerMaxAlarm::PmaxStatusUpdatePanel(PowerMaxAlarm* pm, const PlinkBuffer  
     }
 
     // if system state flag says it is a zone event (bit 5 of system flag)  
-    if (pm->isZoneEvent()) {
+    if (this->isZoneEvent()) {
         const unsigned char zoneId = Buff->buffer[5];
         ZoneEvent eventType = (ZoneEvent)Buff->buffer[6];
 
         //this information is delivered also by periodic updates, but here we get instant update:
         if  ( zoneId<MAX_ZONE_COUNT )
         {
-            DEBUG(LOG_INFO,"Zone-%d-event, (%s) %s", zoneId, pm->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]));
-            pm->zone[zoneId].lastEvent = eventType;
-            pm->zone[zoneId].lastEventTime = os_getCurrentTimeSec();
+            DEBUG(LOG_INFO,"Zone-%d-event, (%s) %s", zoneId, this->getZoneName(zoneId), GetStrPmaxZoneEventTypes(Buff->buffer[6]));
+            this->zone[zoneId].lastEvent = eventType;
+            this->zone[zoneId].lastEventTime = os_getCurrentTimeSec();
 
             switch(eventType)
             {
             case ZE_NotActive:
-                pm->zone[zoneId].stat.active = false;
+                this->zone[zoneId].stat.active = false;
                 break;
 
             case ZE_Open:
-                pm->zone[zoneId].stat.doorOpen = true;
+                this->zone[zoneId].stat.doorOpen = true;
                 break;
 
             case ZE_Closed:
-                pm->zone[zoneId].stat.doorOpen = false;
+                this->zone[zoneId].stat.doorOpen = false;
                 break;
 
             case ZE_LowBattery:
             case ZE_SirenLowBattery:
-                pm->zone[zoneId].stat.lowBattery = true;
+                this->zone[zoneId].stat.lowBattery = true;
                 break;
 
             case ZE_TamperAlarm:
             case ZE_TamperOpen:
             case ZE_SirenTamper:
-                pm->zone[zoneId].stat.tamper = true;
+                this->zone[zoneId].stat.tamper = true;
                 break;
 
             case ZE_TamperRestore:
             case ZE_SirenTamperRestore:
-                pm->zone[zoneId].stat.tamper = false;
+                this->zone[zoneId].stat.tamper = false;
                 break;
 
             default:
@@ -1351,10 +1351,9 @@ void PowerMaxAlarm::PmaxStatusUpdatePanel(PowerMaxAlarm* pm, const PlinkBuffer  
     }
 }
 
-
-void PowerMaxAlarm::PmaxStatusUpdateZoneBat(PowerMaxAlarm* pm, const PlinkBuffer  * Buff)
+void PowerMaxAlarm::OnStatusUpdateZoneBat(const PlinkBuffer  * Buff)
 {
-    pm->sendCommand(Pmax_ACK);
+    this->sendCommand(Pmax_ACK);
     DEBUG(LOG_INFO,"Status Update : Zone state/Battery");
 
     const unsigned char * ZoneBuffer = Buff->buffer+3;
@@ -1364,10 +1363,10 @@ void PowerMaxAlarm::PmaxStatusUpdateZoneBat(PowerMaxAlarm* pm, const PlinkBuffer
         int offset=(i-1)%8;
         if (ZoneBuffer[byte] & 1<<offset) {
             DEBUG(LOG_INFO,"Zone %d is open",i );
-            pm->zone[i].stat.doorOpen=true;      
+            this->zone[i].stat.doorOpen=true;      
         }
         else {
-            pm->zone[i].stat.doorOpen=false;
+            this->zone[i].stat.doorOpen=false;
         }     
     }
 
@@ -1378,10 +1377,10 @@ void PowerMaxAlarm::PmaxStatusUpdateZoneBat(PowerMaxAlarm* pm, const PlinkBuffer
         int offset=(i-1)%8;
         if (ZoneBuffer[byte] & 1<<offset) {
             DEBUG(LOG_INFO,"Zone %d battery is low",i );
-            pm->zone[i].stat.lowBattery=true;
+            this->zone[i].stat.lowBattery=true;
         }
         else  {
-            pm->zone[i].stat.lowBattery=false;
+            this->zone[i].stat.lowBattery=false;
         }             
     }
 } 
@@ -1409,7 +1408,7 @@ unsigned char calculChecksum(const unsigned char* data, int dataSize) {
     return (unsigned char) checksum;
 } 
 
-void  PowerMaxAlarm::SendNextCommand()
+void  PowerMaxAlarm::sendNextCommand()
 {
     if(m_bDownloadMode == false)
     {
@@ -1434,7 +1433,7 @@ void  PowerMaxAlarm::SendNextCommand()
 }
 
 //buffer is coppied, description and options need to be in pernament addressess (not something from stack)
-bool PowerMaxAlarm::QueueCommand(const unsigned char* buffer, int bufferLen, const char* description, unsigned char expectedRepply, const char* options)
+bool PowerMaxAlarm::queueCommand(const unsigned char* buffer, int bufferLen, const char* description, unsigned char expectedRepply, const char* options)
 {
     if(m_sendQueue.isFull())
     {
@@ -1596,7 +1595,7 @@ void PowerMaxAlarm::handlePacket(PlinkBuffer* commandBuffer) {
         for (int i=0;i<cmdCnt;i++)  {
             if (findCommand(commandBuffer,&PmaxCommand[i]))  {
 				DEBUG(LOG_INFO, "Command found: '%s'", PmaxCommand[i].description);
-                PmaxCommand[i].action(this, commandBuffer);
+                (this->*PmaxCommand[i].action)(commandBuffer);
                 cmd_not_recognized=0;
                 break;
             }   
@@ -1638,7 +1637,7 @@ void ConsoleOutput::write(const char* str)
     DEBUG_RAW(LOG_NO_FILTER, "%s", str);
 }
 
-void PowerMaxAlarm::DumpToJson(IOutput* outputStream)
+void PowerMaxAlarm::dumpToJson(IOutput* outputStream)
 {
     outputStream->write("{");
     {

@@ -18,16 +18,12 @@
 
 //This enables ESP to send a multicast UDP packet on LAN with notifications
 //Any device on your LAN can register to listen for those messages, and will get a status of the alarm
-#define PM_ENABLE_LAN_BROADCAST
+//#define PM_ENABLE_LAN_BROADCAST
 
 //Those settings control where to send lan broadcast, clients need to use the same value. Note IP specified here has nothing to do with ESP IP, it's only a destination for multicast
 //Read more about milticast here: http://en.wikipedia.org/wiki/IP_multicast
 IPAddress PM_LAN_BROADCAST_IP(224, 192, 32, 12);
 #define   PM_LAN_BROADCAST_PORT  23127
-
-//Specify user friendly names for your zones
-const char * const cfg_zones[] = {  "system",  "front door", "hall", "living room",  "kitchen", 
-                                    "study",  "upstairs", "conservatory", "garage", "back door", "garage2"};
 
 //Specify your WIFI settings:
 #define WIFI_SSID "IreksNetUnit8"
@@ -140,7 +136,7 @@ void handleStatus() {
   client.print("\r\n");
 
   WebOutput out(&client);
-  pm.DumpToJson(&out);
+  pm.dumpToJson(&out);
   out.flush();
 
   client.stop();
@@ -192,7 +188,7 @@ void setup(void){
   telnetServer.setNoDelay(true);
 #endif
 
-  pm.Init();
+  pm.init();
 }
 
 #ifdef PM_ENABLE_TELNET_ACCESS
@@ -297,7 +293,7 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
     }
     else if ( c == 'j' ) {
         ConsoleOutput out;
-        pm->DumpToJson(&out);
+        pm->dumpToJson(&out);
     }
     else if ( c == 'c' ) {
         DEBUG(LOG_NOTICE,"Exiting...");
@@ -449,7 +445,7 @@ void loop(void){
 
   if(millis() - lastMsg > 300 || millis() < lastMsg)
   {
-    pm.SendNextCommand();
+    pm.sendNextCommand();
   }
 
 #ifdef PM_ENABLE_TELNET_ACCESS
@@ -566,21 +562,6 @@ bool os_serialPortInit(const char* portName) {
 void os_strncat_s(char* dst, int dst_size, const char* src)
 {
     strncat(dst, src, dst_size);
-}
-
-int os_cfg_getZoneCnt()
-{
-    return sizeof(cfg_zones)/sizeof(cfg_zones[0]);
-}
-
-const char* os_cfg_getZoneName(int idx)
-{
-  if(idx >= os_cfg_getZoneCnt())
-  {
-    return "??";
-  }
-
-    return cfg_zones[idx];
 }
 
 int os_cfg_getPacketTimeout()
