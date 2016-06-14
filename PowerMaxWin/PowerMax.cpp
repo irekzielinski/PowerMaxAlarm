@@ -61,6 +61,15 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
   if ( _kbhit() )  {
     c = getchar();
  
+    if(pm->isConfigParsed() == false &&
+       (c == 'h' || //arm home
+        c == 'a' || //arm away
+        c == 'd'))  //disarm
+    {
+        DEBUG(LOG_NOTICE,"EPROM is not download yet (no PIN requred to perform this operation)");
+        return;
+    }
+
     if ( c == 'c' ) {
       printf("Exiting...");
       exit(1);
@@ -70,6 +79,7 @@ void KeyPressHandling(PowerMaxAlarm* pm) {
       pm->sendCommand(Pmax_ARMHOME);
     }
     else if ( c == 'd' ) {
+      
       DEBUG(LOG_NOTICE,"Disarm");
       pm->sendCommand(Pmax_DISARM);
     }  

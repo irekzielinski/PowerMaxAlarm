@@ -251,6 +251,7 @@ public:
     static bool isBufferOK(const PlinkBuffer* commandBuffer);
     const char* getZoneName(unsigned char zoneId);
 
+    bool isConfigParsed() const { return m_cfg.parsedOK; }
     unsigned int getEnrolledZoneCnt() const;
     unsigned long getSecondsFromLastComm() const;
     void dumpToJson(IOutput* outputStream);

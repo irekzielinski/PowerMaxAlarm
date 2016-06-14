@@ -256,6 +256,15 @@ void handleTelnetRequests(PowerMaxAlarm* pm) {
   if ( telnetClient.connected() && telnetClient.available() )  {
     c = telnetClient.read();
 
+    if(pm->isConfigParsed() == false &&
+       (c == 'h' || //arm home
+        c == 'a' || //arm away
+        c == 'd'))  //disarm
+    {
+        //DEBUG(LOG_NOTICE,"EPROM is not download yet (no PIN requred to perform this operation)");
+        return;
+    }
+
 #ifdef PM_ALLOW_CONTROL
     if ( c == 'h' ) {
       DEBUG(LOG_NOTICE,"Arming home");
