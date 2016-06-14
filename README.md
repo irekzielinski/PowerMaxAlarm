@@ -52,7 +52,7 @@ You can modify ESP8266 code according to your needs (maybe push data to external
 
 For this project I recommend to use WeMos D1 board (full size, not mini):
 * D1 operates on 3.3V which is compatible with PM RS232 interface.
-* D1 has a DC jack that can accept 12V power that is available inside PM alarms.
+* D1 has a DC jack that can accept 12V power that is available inside PM alarms (ground to the outside, 12V+ to the centre pin).
 * Size of the board allows to fit it inside PM alarm (tested with PowerMax Complete)
 * D1 allows Over-The-Air (WiFi) firmware updates, so you don't need to open the alarm to update the firmware.
     
