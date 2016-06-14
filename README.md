@@ -13,13 +13,20 @@ This project is separate into following parts:
     * Serial interface
     * TCP/IP (by connecting to ESP8266 running PMAX in packet relay mode)
     
-* ESP8266 sketch.
+* [ESP8266 sketch](#esp8266-sketch).
   ESP8266 is a cheap (around 4£) microcontroller with Wi-Fi capability.
   It's very easy to connect it into the PM and can be hidden inside the alarm.
   ESP8266 can work in two modes:
     * Stand alone: where it uses PMAX library to communicate with PM alarm, and exposes web and telnet interface.
     * Packet relay mode: where ESP serves as a transparent, wireless communication link, this removes a need for USB->Serial adapters and wires.
                          Packet relay mode is used by Windows command line app to connect to PM alarm wirelessly.
+
+***
+
+## Generic C++ library (PMAX).
+Implements everything needed to communicate with PowerMax alarm in portable C++ class (no references to other libraries).
+If you want to extend the functionality (for example add MQTT support, inherit from this class and override functions you need). 
+
 
 ***
 
