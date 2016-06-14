@@ -7,7 +7,7 @@ This project is separate into following parts:
 * Generic C++ library (called PMAX) that you can use to interface with PowerMax alarms.
   Allows decoding packets, handling all communication, reading settings from device, arm/disarm, etc.
   
-* Windows command line application.
+* [Windows command line application](#windows-command-line-application).
   It uses PMAX library to communicate with PM alarm.
   Communication can be done using:
     * Serial interface
