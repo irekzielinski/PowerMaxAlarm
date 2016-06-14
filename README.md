@@ -58,7 +58,7 @@ For this project I recommend to use WeMos D1 board (full size, not mini):
     
 Getting started:
 * Purchase [WeMos D1 board](http://www.wemos.cc/Products/d1_r2.html) (both revision 1 and 2 are OK)
-* Connect it first to the PC, and flash PowerMaxEsp8266 project using (Arduino IDE)[http://www.wemos.cc/tutorial/get_started_in_arduino.html].
+* Connect it first to the PC, and flash PowerMaxEsp8266 project using [Arduino IDE](http://www.wemos.cc/tutorial/get_started_in_arduino.html).
 * Connect WeMos to PowerMax RS232 port:
   ![Wemos pinout](https://github.com/irekzielinski/PowerMaxAlarm/blob/master/doc/WemosPowerMax.png?raw=true)
 * Connect 12V power from alarm to DC input in WeMos D1
