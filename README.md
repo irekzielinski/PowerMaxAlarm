@@ -40,21 +40,22 @@ There are two ways to establish connection:
 ## ESP8266 sketch.
 ESP8266 is a very inexpensive way to add WiFi capability to your PM alarm.
 In simplest scenario you don't need ANYTHING else, no PC, no raspberry PI needed, nothing.
+
 ESP8266 communicates with your alarm via PMAX library, exposes simple Web and telnet interfaces on your WiFi network.
 ESP8266 allows also for other apps to connect directly to the alarm (works as a wireless packet relay).
 You can modify ESP8266 code according to your needs (maybe push data to external website, etc).
 
 For this project I recommend to use WeMos D1 board (full size, not mini):
-    * D1 operates on 3.3V which is compatible with PM RS232 interface.
-    * D1 has a DC jack that can accept 12V power that is available inside PM alarms.
-    * Size of the board allows to fit it inside PM alarm (tested with PowerMax Complete)
-    * D1 allows Over-The-Air (WiFi) firmware updates, so you don't need to open the alarm to update the firmware.
+* D1 operates on 3.3V which is compatible with PM RS232 interface.
+* D1 has a DC jack that can accept 12V power that is available inside PM alarms.
+* Size of the board allows to fit it inside PM alarm (tested with PowerMax Complete)
+* D1 allows Over-The-Air (WiFi) firmware updates, so you don't need to open the alarm to update the firmware.
     
 Getting started:
-    * Purchase WeMos D1 board (both revision 1 and 2 are OK)
-    * Connect it first to the PC, and flash PowerMaxEsp8266 project
-    * Connect WeMos to PowerMax RS232 port:
-    * Connect 12V power from alarm to DC input in WeMos D1
-    * On PowerMax Complete that's all you need to do, on other board you might need to perform manual powerlink enrolment
-    * Find IP address of your ESP
-    * Connect to this IP with telnet or browser
+* Purchase WeMos D1 board (both revision 1 and 2 are OK)
+* Connect it first to the PC, and flash PowerMaxEsp8266 project
+* Connect WeMos to PowerMax RS232 port:
+* Connect 12V power from alarm to DC input in WeMos D1
+* On PowerMax Complete that's all you need to do, on other board you might need to perform manual powerlink enrolment
+* Find IP address of your ESP
+* Connect to this IP with telnet or browser
