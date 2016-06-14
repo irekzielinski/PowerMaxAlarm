@@ -4,7 +4,7 @@
 ## Monitor and control your alarm (via wired or WiFi link).
 
 This project is separate into following parts:
-* Generic C++ library (called PMAX) that you can use to interface with PowerMax alarms.
+* [Generic C++ library](#generic-c-library-pmax) (called PMAX) that you can use to interface with PowerMax alarms.
   Allows decoding packets, handling all communication, reading settings from device, arm/disarm, etc.
   
 * [Windows command line application](#windows-command-line-application).
@@ -22,14 +22,12 @@ This project is separate into following parts:
                          Packet relay mode is used by Windows command line app to connect to PM alarm wirelessly.
 
 ***
-
 ## Generic C++ library (PMAX).
 Implements everything needed to communicate with PowerMax alarm in portable C++ class (no references to other libraries).
 If you want to extend the functionality (for example add MQTT support, inherit from this class and override functions you need). 
-
+This library is used by Windows command line app and ESP8266 microcontroller.
 
 ***
-
 ## Windows command line application.
 This application allows you to connect to PM alarm, monitor and control it via command line.
 There are two ways to establish connection:
@@ -46,7 +44,7 @@ There are two ways to establish connection:
 ***
 ## ESP8266 sketch.
 ESP8266 is a very inexpensive way to add WiFi capability to your PM alarm.
-In simplest scenario you don't need ANYTHING else, no PC, no raspberry PI needed, nothing.
+In simplest scenario **you don't need ANYTHING else**, no PC, no raspberry PI needed, nothing.
 
 ESP8266 communicates with your alarm via PMAX library, exposes simple Web and telnet interfaces on your WiFi network.
 ESP8266 allows also for other apps to connect directly to the alarm (works as a wireless packet relay).
@@ -59,10 +57,11 @@ For this project I recommend to use WeMos D1 board (full size, not mini):
 * D1 allows Over-The-Air (WiFi) firmware updates, so you don't need to open the alarm to update the firmware.
     
 Getting started:
-* Purchase WeMos D1 board (both revision 1 and 2 are OK)
-* Connect it first to the PC, and flash PowerMaxEsp8266 project
+* Purchase [WeMos D1 board](http://www.wemos.cc/Products/d1_r2.html) (both revision 1 and 2 are OK)
+* Connect it first to the PC, and flash PowerMaxEsp8266 project using (Arduino IDE)[http://www.wemos.cc/tutorial/get_started_in_arduino.html].
 * Connect WeMos to PowerMax RS232 port:
+  ![Wemos pinout](https://github.com/irekzielinski/PowerMaxAlarm/blob/master/doc/WemosPowerMax.png?raw=true)
 * Connect 12V power from alarm to DC input in WeMos D1
 * On PowerMax Complete that's all you need to do, on other board you might need to perform manual powerlink enrolment
 * Find IP address of your ESP
-* Connect to this IP with telnet or browser
+* Connect to this IP with telnet or web browser
