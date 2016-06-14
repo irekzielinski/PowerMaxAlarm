@@ -4,12 +4,18 @@
 #include <time.h> /* POSIX terminal control definitions */
 #include <stdio.h>
 
+//Don't forget to link libws2_32.a to your program as well
+#include <winsock.h>
+
 //This file contains OS specific implementation for Windows
 //If you build for other platrorms (like Linux, don't include this file, but provide your own)
 
-#ifdef USE_SERIAL
+bool g_useComPort = true;
+
 static HANDLE g_hCommPort = INVALID_HANDLE_VALUE;
-#endif
+static SOCKET s = 0; //Socket handle
+static HANDLE hLogFile = INVALID_HANDLE_VALUE;
+
 
 /* Private storage for the current mask */
 static int log_consolemask = 0xFFFF; 
@@ -57,8 +63,8 @@ unsigned long os_getCurrentTimeSec()
     return (unsigned long) time(NULL);
 }
 
-#ifdef USE_SERIAL
-int os_serialPortRead(void* readBuff, int bytesToRead)
+
+int com_pmComPortRead(void* readBuff, int bytesToRead)
 {
     if(g_hCommPort == INVALID_HANDLE_VALUE)
     {
@@ -83,7 +89,7 @@ int os_serialPortRead(void* readBuff, int bytesToRead)
     return dwTotalRead;
 }
 
-int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
+int com_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
     if(g_hCommPort == INVALID_HANDLE_VALUE)
     {
@@ -108,7 +114,7 @@ int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
     return dwTotalWritten;
 }
 
-bool os_serialPortClose()
+bool com_pmComPortClose()
 {
     if(g_hCommPort == INVALID_HANDLE_VALUE)
     {
@@ -122,7 +128,7 @@ bool os_serialPortClose()
     return true;
 }
 
-bool os_serialPortInit(const char* portName) {
+bool com_pmComPortInit(const char* portName) {
     if(g_hCommPort != INVALID_HANDLE_VALUE)
     {
         DEBUG(LOG_ERR, "Com port is already opened.");
@@ -182,14 +188,6 @@ bool os_serialPortInit(const char* portName) {
     DEBUG(LOG_INFO, "Current Settings\n Baud Rate %d\n Parity %d\n Byte Size %d\n Stop Bits %d", config.BaudRate, config.Parity, config.ByteSize, config.StopBits);
     return true;
 } 
-#else
-//CONNECT TO REMOTE HOST (CLIENT APPLICATION)
-//Include the needed header files.
-//Don't forget to link libws2_32.a to your program as well
-#include <winsock.h>
-SOCKET s = 0; //Socket handle
-
-HANDLE hLogFile = INVALID_HANDLE_VALUE;
 
 bool readUntilNewLine(char* buffer, int buffSize)
 {
@@ -340,51 +338,9 @@ void LogBuffer(const char* prefix, const unsigned char* buffer, int bufferLen)
     }
 }
 
-/*static unsigned char g_readCache[MAX_BUFFER_SIZE];
-static int g_cacheSize = 0;
 
-static int readFromCache(void* readBuff, int bytesToRead)
-{
-    int bytesToCopy = bytesToRead;
-    if(bytesToCopy >= g_cacheSize)
-    {
-        bytesToCopy = g_cacheSize;
-    }
 
-    if(bytesToCopy == 0)
-    {
-        return 0;
-    }
-
-    memcpy(readBuff, g_readCache, bytesToCopy);
-    memmove(g_readCache, g_readCache+bytesToCopy, g_cacheSize-bytesToCopy);
-    g_cacheSize -= bytesToCopy;
-
-    return bytesToCopy;
-}
-
-int os_serialPortRead(void* readBuff, int bytesToRead)
-{
-    if(bytesToRead == 0)
-    {
-        return 0;
-    }
-
-    int totalRead = readFromCache(readBuff, bytesToRead);
-    if(totalRead > 0)
-    {
-        return totalRead;
-    }
-
-    g_cacheSize = recv(s, (char*)g_readCache, sizeof(g_readCache), 0);
-    if(g_cacheSize < 0)
-    {
-        g_cacheSize = 0;
-    }
-    return readFromCache(readBuff, bytesToRead);
-}*/
-
-int os_serialPortRead(void* readBuff, int bytesToRead)
+int tcp_pmComPortRead(void* readBuff, int bytesToRead)
 {
     int totalRead = 0;
     while( bytesToRead > 0 ){
@@ -404,7 +360,7 @@ int os_serialPortRead(void* readBuff, int bytesToRead)
     return totalRead;
 }
 
-int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
+int tcp_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
    LogBuffer("PC", (const unsigned char*)dataToWrite, bytesToWrite);
 
@@ -426,7 +382,7 @@ int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
     return totalSent;
 }
 
-bool os_serialPortClose()
+bool tcp_pmComPortClose()
 {
     //Close the socket if it exists
     if (s)
@@ -436,14 +392,13 @@ bool os_serialPortClose()
     return true;
 }
 
-bool os_serialPortInit(const char* portName) {
+bool tcp_pmComPortInit(const char* portName) {
  
     hLogFile = CreateFile(L"comms.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     SetFilePointer(hLogFile, 0, 0, FILE_END);
 
-    //IZIZTODO:
     int PortNo = 23;
-    const char* IPAddress = "192.168.0.119";
+    const char* IPAddress = portName;
 
     WSADATA wsadata;
     int error = WSAStartup(MAKEWORD(2,2), &wsadata);
@@ -515,15 +470,60 @@ bool os_serialPortInit(const char* portName) {
 } 
 
 
-#endif
-
-
 void os_strncat_s(char* dst, int dst_size, const char* src)
 {
     strncat_s(dst, dst_size, src, _TRUNCATE);
 }
 
 ////////////////////////
+int os_pmComPortRead(void* readBuff, int bytesToRead)
+{
+    if(g_useComPort)
+    {
+        return com_pmComPortRead(readBuff, bytesToRead);
+    }
+    else
+    {
+        return tcp_pmComPortRead(readBuff, bytesToRead);
+    }
+}
+
+int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
+{
+    if(g_useComPort)
+    {
+        return com_pmComPortWrite(dataToWrite, bytesToWrite);
+    }
+    else
+    {
+        return tcp_pmComPortWrite(dataToWrite, bytesToWrite);
+    }
+}
+
+bool os_pmComPortClose()
+{
+    if(g_useComPort)
+    {
+        return com_pmComPortClose();
+    }
+    else
+    {
+        return tcp_pmComPortClose();
+    }
+}
+
+bool os_pmComPortInit(const char* portName)
+{
+    if(g_useComPort)
+    {
+        return com_pmComPortInit(portName);
+    }
+    else
+    {
+        return tcp_pmComPortInit(portName);
+    }
+}
+
 
 int os_cfg_getPacketTimeout()
 {

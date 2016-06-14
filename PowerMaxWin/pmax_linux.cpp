@@ -106,7 +106,7 @@ unsigned long os_getCurrentTimeSec()
     return (unsigned long) time(NULL);
 }
 
-int os_serialPortRead(void* readBuff, int bytesToRead)
+int os_pmComPortRead(void* readBuff, int bytesToRead)
 {
     if(fd == 0)
     {
@@ -117,7 +117,7 @@ int os_serialPortRead(void* readBuff, int bytesToRead)
     return read(fd, readBuff, bytesToRead);
 }
 
-int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
+int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
     if(fd == 0)
     {
@@ -128,7 +128,7 @@ int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
     return write(fd, dataToWrite, bytesToWrite);
 }
 
-bool os_serialPortClose()
+bool os_pmComPortClose()
 {
     if(fd == 0)
     {
@@ -142,7 +142,7 @@ bool os_serialPortClose()
     return true;
 }
 
-bool os_serialPortInit(const char* portName) {
+bool os_pmComPortInit(const char* portName) {
   struct termios options;
    
     fd = open(portName, O_RDWR | O_NOCTTY);

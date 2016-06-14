@@ -394,7 +394,7 @@ bool serialHandler(PowerMaxAlarm* pm) {
   memset(&commandBuffer, 0, sizeof(commandBuffer));
   
   char oneByte = 0;  
-  while (  (os_serialPortRead(&oneByte, 1) == 1)  ) 
+  while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
   {     
     if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
     {
@@ -525,7 +525,7 @@ unsigned long os_getCurrentTimeSec()
   return (wrapCnt*4294967) + seconds;
 }
 
-int os_serialPortRead(void* readBuff, int bytesToRead)
+int os_pmComPortRead(void* readBuff, int bytesToRead)
 {
     int dwTotalRead = 0;
     while(bytesToRead > 0)
@@ -553,18 +553,18 @@ int os_serialPortRead(void* readBuff, int bytesToRead)
     return dwTotalRead;
 }
 
-int os_serialPortWrite(const void* dataToWrite, int bytesToWrite)
+int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
     Serial.write((const uint8_t*)dataToWrite, bytesToWrite);
     return bytesToWrite;
 }
 
-bool os_serialPortClose()
+bool os_pmComPortClose()
 {
     return true;
 }
 
-bool os_serialPortInit(const char* portName) {
+bool os_pmComPortInit(const char* portName) {
     return true;
 } 
 

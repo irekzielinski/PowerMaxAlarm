@@ -1483,7 +1483,7 @@ bool PowerMaxAlarm::sendBuffer(const unsigned char * data, int bufferSize)
     writeBuffer.buffer[2+bufferSize]=0x0A;
     writeBuffer.size=bufferSize+3;
 
-    const int bytesWritten = os_serialPortWrite(writeBuffer.buffer,bufferSize+3);
+    const int bytesWritten = os_pmComPortWrite(writeBuffer.buffer,bufferSize+3);
     if(bytesWritten == bufferSize+3)
     {
         DEBUG(LOG_DEBUG,"serial write OK"); 

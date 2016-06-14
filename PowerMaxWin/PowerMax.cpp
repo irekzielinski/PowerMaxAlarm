@@ -4,6 +4,7 @@
 #include "targetver.h"
 #include <stdio.h>
 #include <tchar.h>
+#include <iostream>
 
 #include <windows.h>
 #include <conio.h>
@@ -17,7 +18,7 @@ bool serialHandler(PowerMaxAlarm* pm) {
     memset(&commandBuffer, 0, sizeof(commandBuffer));
 
 	char byte = 0;
-    while (  (os_serialPortRead(&byte, 1) == 1)  ) { 
+    while (  (os_pmComPortRead(&byte, 1) == 1)  ) { 
         
         if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
 		{
@@ -154,6 +155,40 @@ void loadMapToFile(const char* name, MemoryMap* map)
     CloseHandle(hDump);
 }
 
+extern bool g_useComPort;
+
+void askUserForSettings(char* port, int portSize)
+{
+    char tmp[10] = "";
+    std::cout << "This application can work in wired mode (using COM port) or via TCP/IP to ESP8266 running PMAX\r\n";
+  
+    while(strcmp(tmp, "1") != 0 && strcmp(tmp, "2") != 0)
+    {
+        std::cout << "Press 1 for COM\r\nPress 2 for TCP/IP\r\n";
+        std::cin.getline(tmp,10);
+    }
+
+    if(strcmp(tmp, "1") == 0)
+    {
+        g_useComPort = true;
+        std::cout << "Specify COM port name to open, for example: COM3\r\n";
+    }
+    else if(strcmp(tmp, "2") == 0)
+    {
+        g_useComPort = false;
+        std::cout << "Specify host to connect using IP or host name:\r\n";
+    }
+
+    std::cin.getline(port,portSize);
+
+    //just some default for debugging
+    if(g_useComPort == false && strlen(port) == 0)
+    {
+        strcpy(port, "192.168.0.119");
+    }
+
+    std::cout << "After connection is established and handshake complete press ? for list of commands.\r\n";
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -163,7 +198,10 @@ int _tmain(int argc, _TCHAR* argv[])
     }
     return 0;*/
 
-    if(os_serialPortInit("COM3") == false)
+    char szPort[512];
+    askUserForSettings(szPort, sizeof(szPort));
+
+    if(os_pmComPortInit(szPort) == false)
     {
         return 1;
     }
@@ -197,7 +235,7 @@ int _tmain(int argc, _TCHAR* argv[])
         }*/
     }  
 
-    os_serialPortClose();
+    os_pmComPortClose();
     return 0;
 }
 

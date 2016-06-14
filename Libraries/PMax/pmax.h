@@ -321,10 +321,10 @@ protected:
 #define DEBUG_RAW(x,...) os_debugLog(x, true,__FUNCTION__,__LINE__,__VA_ARGS__);
 int log_console_setlogmask(int mask);
 
-bool os_serialPortInit(const char* portName);
-int  os_serialPortRead(void* writePos, int bytesToRead);
-int  os_serialPortWrite(const void* dataToWrite, int bytesToWrite);
-bool os_serialPortClose();
+bool os_pmComPortInit(const char* portName);
+int  os_pmComPortRead(void* writePos, int bytesToRead);
+int  os_pmComPortWrite(const void* dataToWrite, int bytesToWrite);
+bool os_pmComPortClose();
 void os_usleep(int microseconds);
 
 int os_cfg_getPacketTimeout();
