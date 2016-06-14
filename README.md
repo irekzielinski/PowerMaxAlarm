@@ -1,41 +1,44 @@
- # PowerMaxAlarm
+# PowerMaxAlarm
 
- # Generic C++ library for Visonic PowerMax alarms, with number of projects that use it.
- # This allows to monitor and control your alarm (via wired or WiFi link).
+# Generic C++ library for Visonic PowerMax alarms, with number of projects that use it.
+# Monitor and control your alarm (via wired or WiFi link).
 
 This project is separate into following parts:
-- Generic C++ library (called PMAX) that you can use to interface with PowerMax alarms.
+* Generic C++ library (called PMAX) that you can use to interface with PowerMax alarms.
   Allows decoding packets, handling all communication, reading settings from device, arm/disarm, etc.
   
-- Windows command line application.
+* Windows command line application.
   It uses PMAX library to communicate with PM alarm.
   Communication can be done using:
     - Serial interface
     - TCP/IP (by connecting to ESP8266 running PMAX in packet relay mode)
     
-- ESP8266 sketch.
-  ESP8266 is a cheap (around 4Â£) microcontroller with Wi-Fi capability.
+* ESP8266 sketch.
+  ESP8266 is a cheap (around 4£) microcontroller with Wi-Fi capability.
   It's very easy to connect it into the PM and can be hidden inside the alarm.
   ESP8266 can work in two modes:
     - Stand alone: where it uses PMAX library to communicate with PM alarm, and exposes web and telnet interface.
     - Packet relay mode: where ESP serves as a transparent, wireless communication link, this removes a need for USB->Serial adapters and wires.
                          Packet relay mode is used by Windows command line app to connect to PM alarm wirelessly.
 
-----
-Windows command line application.
+***
+
+## Windows command line application.
 This application allows you to connect to PM alarm, monitor and control it via command line.
 There are two ways to establish connection:
 
-- Wired:
+* Wired:
   Use 3.3V USB to serial interface and connect it to RS232 port in your alarm.
   NOTE: DO NOT USE 5V usb to serial - as this will kill the alarm.
-  Serial interface can be bought cheaply on ebay for around 3Â£, when connected to the PC, it appears as COM port.
+  Serial interface can be bought cheaply on ebay for around 3£, when connected to the PC, it appears as COM port.
   
-- Wireless (WiFi):
+* Wireless (WiFi):
   Connect to ESP8266 via WiFi (this will put ESP into transparent packet relay mode).
   
-----
-ESP8266 is a very inexpensive way to add WiFi capability to your PM alarm.
+
+***
+
+## ESP8266 is a very inexpensive way to add WiFi capability to your PM alarm.
 In simplest scenario you don't need ANYTHING else, no PC, no raspberry PI needed, nothing.
 ESP8266 communicates with your alarm via PMAX library, exposes simple Web and telnet interfaces on your WiFi network.
 ESP8266 allows also for other apps to connect directly to the alarm (works as a wireless packet relay).
