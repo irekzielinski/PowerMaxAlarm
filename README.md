@@ -71,3 +71,4 @@ Getting started:
 ## Credits:
 * Various posts on: http://www.domoticaforum.eu/viewforum.php?f=68
 * Implementation of PMAX library directly based on this file form DomotiGa3 project: https://github.com/DomotiGa/DomotiGa/blob/master/DomotiGa3/.src/CVisonic.class
+* John Chan: for sharing his own ESP8266 code
