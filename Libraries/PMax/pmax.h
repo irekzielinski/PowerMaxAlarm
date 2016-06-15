@@ -127,10 +127,11 @@ struct ZoneState {
 struct Zone {
     bool enrolled;       //PowerMax knows about this zone (it's configured)
     char name[0x11];     //Will be dowloaded from PowerMax eprom
-    unsigned char zonetype;
-    unsigned char sensorid;
-    const char* sensortype;
-    const char* autocreate;
+    unsigned char zoneType;
+    const char* zoneTypeStr;
+    unsigned char sensorId;
+    const char* sensorType;
+    const char* sensorMake;
 
     ZoneState stat;      //basic state of the zone
 

@@ -476,11 +476,17 @@ const char*  PmaxPanelType[] = {
     "PowerMaster30"              
 };
 
+const char*  PmaxZoneTypes[] = {
+	   "Non-Alarm", "Emergency", "Flood", "Gas", "Delay 1", "Delay 2", "Interior-Follow", "Perimeter", "Perimeter-Follow", 
+	   "24 Hours Silent", "24 Hours Audible", "Fire", "Interior", "Home Delay", "Temperature", "Outdoor", "16"          
+};
+
 IMPEMENT_GET_FUNCTION(PmaxSystemStatus);
 IMPEMENT_GET_FUNCTION(SystemStateFlags);
 IMPEMENT_GET_FUNCTION(PmaxZoneEventTypes);
 IMPEMENT_GET_FUNCTION(PmaxLogEvents);
 IMPEMENT_GET_FUNCTION(PmaxPanelType);
+IMPEMENT_GET_FUNCTION(PmaxZoneTypes);
 
 void PowerMaxAlarm::init() {
 
@@ -802,6 +808,20 @@ int PmConfig::GetMasterPinAsHex() const
     return strtol(userPins[0], NULL, 16);
 }
 
+void trimRight(char* str)
+{
+    int len = strlen(str);
+    while(len > 0)
+    {
+        if(str[len-1] == ' ')
+        {
+            str[len-1] = '\0';
+        }
+
+        len--;
+    }
+}
+
 void PowerMaxAlarm::processSettings()
 {
     m_cfg.Init();
@@ -1030,6 +1050,7 @@ void PowerMaxAlarm::processSettings()
                 if(zoneIndex < MAX_ZONE_COUNT)
                 {
                     strcpy(pZone->name, zoneNames[zoneIndex]);
+                    trimRight(pZone->name);
                 }
                 else
                 {
@@ -1042,48 +1063,49 @@ void PowerMaxAlarm::processSettings()
                 }
                 else
                 {
-                    pZone->zonetype = readBuff[iCnt * 4 - 1];
-                    pZone->sensorid = readBuff[iCnt * 4 - 2];
+                    pZone->zoneType = readBuff[iCnt * 4 - 1];
+                    pZone->zoneTypeStr = GetStrPmaxZoneTypes(pZone->zoneType);
+                    pZone->sensorId = readBuff[iCnt * 4 - 2];
 
-                    switch(pZone->sensorid & 0xF)
+                    switch(pZone->sensorId & 0xF)
                     {
                     case 0x0:
-                        pZone->sensortype = "Vibration";
-                        pZone->autocreate = "Visonic Vibration Sensor";
+                        pZone->sensorType = "Vibration";
+                        pZone->sensorMake = "Visonic Vibration Sensor";
                         break;
 
                     case 0x3:
                     case 0x4:
                     case 0xC:
-                        pZone->sensortype = "Motion";
-                        pZone->autocreate = "Visonic PIR";
+                        pZone->sensorType = "Motion";
+                        pZone->sensorMake = "Visonic PIR";
                         break;
 
                     case 0x5:
                     case 0x6:
                     case 0x7:
-                        pZone->sensortype = "Magnet";
-                        pZone->autocreate = "Visonic Door/Window Contact";
+                        pZone->sensorType = "Magnet";
+                        pZone->sensorMake = "Visonic Door/Window Contact";
                         break;
 
                     case 0xA:
-                        pZone->sensortype = "Smoke";
-                        pZone->autocreate = "Visonic Smoke Detector";
+                        pZone->sensorType = "Smoke";
+                        pZone->sensorMake = "Visonic Smoke Detector";
                         break;
 
                     case 0xB:
-                        pZone->sensortype = "Gas";
-                        pZone->autocreate = "Visonic Gas Detector";
+                        pZone->sensorType = "Gas";
+                        pZone->sensorMake = "Visonic Gas Detector";
                         break;
 
                     case 0xF:
-                        pZone->sensortype = "Wired";
-                        pZone->autocreate = "Visonic PIRWired";
+                        pZone->sensorType = "Wired";
+                        pZone->sensorMake = "Visonic PIRWired";
                         break;
 
                     default:
-                        pZone->sensortype = "Unknown";
-                        pZone->autocreate = "Visonic Unknown";
+                        pZone->sensorType = "Unknown";
+                        pZone->sensorMake = "Visonic Unknown";
                         break;
                     }
                 }
@@ -1644,12 +1666,15 @@ void PowerMaxAlarm::dumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("stat", stat);
         outputStream->writeJsonTag("stat_str", GetStrPmaxSystemStatus(stat));
         outputStream->writeJsonTag("lastCom", (int)getSecondsFromLastComm());
-        
+        outputStream->writeJsonTag("panelType", m_iPanelType);
+        outputStream->writeJsonTag("panelTypeStr", GetStrPmaxPanelType(m_iPanelType));
+        outputStream->writeJsonTag("panelModelType", m_iModelType);
+
         if(m_cfg.parsedOK)
         {
             outputStream->write("\"config\":");
             m_cfg.DumpToJson(outputStream);
-            outputStream->write("\r\n");
+            outputStream->write(",\r\n");
         }
 
         outputStream->writeJsonTag("flags", flags);
@@ -1689,11 +1714,12 @@ void Zone::DumpToJson(IOutput* outputStream)
 {
     outputStream->write("{");
     {
-        outputStream->writeJsonTag("name", name);
-        outputStream->writeJsonTag("zonetype", zonetype);
-        outputStream->writeJsonTag("sensorid", sensorid);
-        outputStream->writeJsonTag("sensortype", sensortype);
-        outputStream->writeJsonTag("autocreate", autocreate);
+        outputStream->writeJsonTag("zoneName", name);
+        outputStream->writeJsonTag("zoneType", zoneType);
+        outputStream->writeJsonTag("zoneTypeStr", zoneTypeStr);
+        outputStream->writeJsonTag("sensorId", sensorId);
+        outputStream->writeJsonTag("sensorType", sensorType);
+        outputStream->writeJsonTag("sensorMake", sensorMake);
         
         if(lastEventTime > 0)
         {
