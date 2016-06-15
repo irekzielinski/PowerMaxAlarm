@@ -1,6 +1,7 @@
 #include "pmax.h"
 #include <string.h>
 #include <stdlib.h>
+#include <cctype>
 
 #define IMPEMENT_GET_FUNCTION(tblName)\
 const char* GetStr##tblName(int index)\
@@ -796,7 +797,7 @@ void PmConfig::DumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("serial_number", serialNumber);
         outputStream->writeJsonTag("eprom", eprom);
         outputStream->writeJsonTag("software", software);
-        outputStream->writeJsonTag("partitionCnt", (int)partitionCnt);
+        outputStream->writeJsonTag("partitionCnt", (int)partitionCnt, false);
     }
 
     outputStream->write("}");
@@ -813,9 +814,13 @@ void trimRight(char* str)
     int len = strlen(str);
     while(len > 0)
     {
-        if(str[len-1] == ' ')
+        if(isspace(str[len-1]))
         {
             str[len-1] = '\0';
+        }
+        else
+        {
+            break;
         }
 
         len--;
