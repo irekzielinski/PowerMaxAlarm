@@ -76,9 +76,9 @@ void handleRoot() {
   minutes = val / 60;
   val -= minutes*60;
 
-  char szTmp[PRINTF_BUF];
-  sprintf(szTmp, "hello from esp8266: Uptime: %02d:%02d:%02d.%02d, free heap: %u", (int)days, (int)hours, (int)minutes, (int)val, ESP.getFreeHeap());  
-  server.send(200, "text/plain", szTmp);
+  char szTmp[PRINTF_BUF*2];
+  sprintf(szTmp, "<html>Hello from esp8266: Uptime: %02d:%02d:%02d.%02d, free heap: %u<br><a href='status'>Alarm Status</a></html>", (int)days, (int)hours, (int)minutes, (int)val, ESP.getFreeHeap());  
+  server.send(200, "text/html", szTmp);
 }
 
 //writes to webpage without storing large buffers, only small buffer is used to improve performance
