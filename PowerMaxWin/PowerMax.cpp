@@ -190,6 +190,37 @@ void askUserForSettings(char* port, int portSize)
     std::cout << "After connection is established and handshake complete press ? for list of commands.\r\n";
 }
 
+//NOTE: PowerMaxAlarm class should contain ONLY functionality of Powerlink
+//If you want to for example send an SMS on arm/disarm event, don't add it to PowerMaxAlarm
+//Instead create a new class that inherits from PowerMaxAlarm, and override required function
+class MyPowerMax : public PowerMaxAlarm
+{
+public:
+    virtual void OnStatusChange(const PlinkBuffer  * Buff)
+    {
+        //call base class implementation first, this will send ACK back and upate internal state.
+        PowerMaxAlarm::OnStatusChange(Buff);
+
+        //now our customization:
+        switch(Buff->buffer[4])
+        {
+        case 0x51: //"Arm Home" 
+        case 0x53: //"Quick Arm Home"
+            //do something...
+            break;
+
+        case 0x52: //"Arm Away"
+        case 0x54: //"Quick Arm Away"
+            //do something...
+            break;
+
+        case 0x55: //"Disarm"
+            //do someting...
+            break;
+        }        
+    }
+};
+
 int _tmain(int argc, _TCHAR* argv[])
 {
     /*{
@@ -206,9 +237,8 @@ int _tmain(int argc, _TCHAR* argv[])
         return 1;
     }
 
-    PowerMaxAlarm pm;
+    MyPowerMax pm;
     pm.init();
-
 
 	log_console_setlogmask(LOG_INFO);
 

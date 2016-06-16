@@ -1227,11 +1227,28 @@ void PowerMaxAlarm::OnStatusUpdate(const PlinkBuffer  * Buff)
     DEBUG(LOG_INFO,"pmax status update")   ;
 }
 
+//0xA7 message, called when system is armed/disarmed
 void PowerMaxAlarm::OnStatusChange(const PlinkBuffer  * Buff)
 {
     this->sendCommand(Pmax_ACK);
-    unsigned char zoneID = Buff->buffer[3];
-    DEBUG(LOG_INFO,"PmaxStatusChange %s %s",this->getZoneName(zoneID),GetStrPmaxLogEvents(Buff->buffer[4])); 
+    DEBUG(LOG_INFO,"PmaxStatusChange: %s", GetStrPmaxLogEvents(Buff->buffer[4])); 
+
+    switch(Buff->buffer[4])
+    {
+    case 0x51: //"Arm Home" 
+    case 0x53: //"Quick Arm Home"
+        this->stat = SS_Armed_Home;
+        break;
+
+    case 0x52: //"Arm Away"
+    case 0x54: //"Quick Arm Away"
+        this->stat = SS_Armed_Away;
+        break;
+
+    case 0x55: //"Disarm"
+        this->stat = SS_Armed_Away;
+        break;
+    }
 }
 
 void PowerMaxAlarm::OnStatusUpdateZoneTamper(const PlinkBuffer  * Buff)
@@ -1318,7 +1335,7 @@ void PowerMaxAlarm::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
 
     {
         char tpbuff[MAX_BUFFER_SIZE] = "";  //IZIZTODO: remove this, output directly to console
-        sprintf(tpbuff,"System status: %s, Flags :", GetStrPmaxSystemStatus(this->stat));    
+        sprintf(tpbuff,"System status: %s (%d), Flags :", GetStrPmaxSystemStatus(this->stat), this->stat);    
         for (int i=0;i<8;i++) //loop trough all 8 bits
         {
             if (this->flags & 1<<i) {

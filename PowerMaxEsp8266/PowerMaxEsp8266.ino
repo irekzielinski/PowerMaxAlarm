@@ -26,12 +26,43 @@ IPAddress PM_LAN_BROADCAST_IP(224, 192, 32, 12);
 #define   PM_LAN_BROADCAST_PORT  23127
 
 //Specify your WIFI settings:
-#define WIFI_SSID "IreksNetUnit8"
+#define WIFI_SSID "??"
 #define WIFI_PASS "??"
 
 //////////////////////////////////////////////////////////////////////////////////
+//NOTE: PowerMaxAlarm class should contain ONLY functionality of Powerlink
+//If you want to (for example) send an SMS on arm/disarm event, don't add it to PowerMaxAlarm
+//Instead create a new class that inherits from PowerMaxAlarm, and override required function
+class MyPowerMax : public PowerMaxAlarm
+{
+public:
+    virtual void OnStatusChange(const PlinkBuffer  * Buff)
+    {
+        //call base class implementation first, this will send ACK back and upate internal state.
+        PowerMaxAlarm::OnStatusChange(Buff);
 
-PowerMaxAlarm pm;
+        //now our customization:
+        switch(Buff->buffer[4])
+        {
+        case 0x51: //"Arm Home" 
+        case 0x53: //"Quick Arm Home"
+            //do something...
+            break;
+
+        case 0x52: //"Arm Away"
+        case 0x54: //"Quick Arm Away"
+            //do something...
+            break;
+
+        case 0x55: //"Disarm"
+            //do someting...
+            break;
+        }        
+    }
+};
+//////////////////////////////////////////////////////////////////////////////////
+
+MyPowerMax pm;
 ESP8266WebServer server(80);
 
 int telnetDbgLevel = LOG_NO_FILTER; //by default only NO FILTER messages are logged to telnet clients 
@@ -77,7 +108,7 @@ void handleRoot() {
   val -= minutes*60;
 
   char szTmp[PRINTF_BUF*2];
-  sprintf(szTmp, "<html>Hello from esp8266: Uptime: %02d:%02d:%02d.%02d, free heap: %u<br><a href='status'>Alarm Status</a></html>", (int)days, (int)hours, (int)minutes, (int)val, ESP.getFreeHeap());  
+  sprintf(szTmp, "<html>Hello from esp8266.<br>Uptime: %02d:%02d:%02d.%02d<br>free heap: %u<br><a href='status'>Alarm Status</a></html>", (int)days, (int)hours, (int)minutes, (int)val, ESP.getFreeHeap());  
   server.send(200, "text/html", szTmp);
 }
 
