@@ -8,6 +8,7 @@
 *.sln.docstates
 .svn/
 *.map
+PowerMaxEsp8266_IZ/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

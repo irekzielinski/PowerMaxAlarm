@@ -1246,7 +1246,7 @@ void PowerMaxAlarm::OnStatusChange(const PlinkBuffer  * Buff)
         break;
 
     case 0x55: //"Disarm"
-        this->stat = SS_Armed_Away;
+        this->stat = SS_Disarm;
         break;
     }
 }
