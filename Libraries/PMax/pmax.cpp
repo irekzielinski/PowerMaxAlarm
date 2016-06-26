@@ -1544,22 +1544,22 @@ void PowerMaxAlarm::sendBuffer(struct PlinkBuffer * Buff)  {
     sendBuffer(Buff->buffer, Buff->size);
 }
 
-bool deFormatBuffer(struct PlinkBuffer  * Buff) {
-    int i;
-    unsigned char checkedChecksum,checksum;
-    checksum=Buff->buffer[Buff->size-2];
+bool deFormatBuffer(struct PlinkBuffer  * Buff, bool ignoreErrors) {
+    const unsigned char checksum=Buff->buffer[Buff->size-2];
 
-    for (i=0;i<Buff->size;i++)
+    for (int i=0;i<Buff->size;i++)
         Buff->buffer[i]=Buff->buffer[i+1]; 
 
     Buff->size=Buff->size-3;
-    checkedChecksum=calculChecksum(Buff->buffer, Buff->size);
+    const unsigned char checkedChecksum=calculChecksum(Buff->buffer, Buff->size);
     if (checksum==checkedChecksum)  {
         DEBUG(LOG_DEBUG,"checksum OK");
         return true;
     } 
     else  {
-        DEBUG(LOG_ERR,"checksum NOK calculated:%04X in packet:%04X",checkedChecksum,checksum);
+        if(ignoreErrors != 0){
+            DEBUG(LOG_ERR,"checksum NOK calculated:%02X in packet:%02X",checkedChecksum,checksum);
+        }
         return false;
     }  
 }  
@@ -1599,10 +1599,10 @@ bool findCommand(const PlinkBuffer  * Buff, const PlinkCommand  * BuffCommand)  
 
 bool PowerMaxAlarm::isBufferOK(const PlinkBuffer* commandBuffer)
 {
-	const int old = log_console_setlogmask(0);
+    const int old = log_console_setlogmask(LOG_ALERT); //highest level only
 	PlinkBuffer commandBufferTmp ;
 	memcpy(&commandBufferTmp, commandBuffer, sizeof(PlinkBuffer));
-	bool ok = deFormatBuffer(&commandBufferTmp);
+	bool ok = deFormatBuffer(&commandBufferTmp, true);
 
 	log_console_setlogmask(old);
 	return ok;
@@ -1626,7 +1626,7 @@ void PowerMaxAlarm::handlePacket(PlinkBuffer* commandBuffer) {
 
     m_ackTypeForLastMsg = ACK_1;
 
-    if (deFormatBuffer(commandBuffer)) {
+    if (deFormatBuffer(commandBuffer, false)) {
         DEBUG(LOG_DEBUG,"Packet received");
         lastIoTime = os_getCurrentTimeSec();
 
