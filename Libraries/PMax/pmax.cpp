@@ -64,6 +64,7 @@ Private VMSG_PMASTER_STAT1 {&HB0, &H01, &H04, &H06, &H02, &HFF, &H08, &H03, &H00
 //Private VMSG_DL_SIRENS {0x3E, 0x60, 0x0A, 0x08, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //Private VMSG_DL_X10NAMES {0x3E, 0x30, 0x0B, 0x10, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 #define VMSG_DL_ZONENAMES {0x3E, 0x40, 0x0B, 0x1E, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00}
+#define VMSG_DL_ZONESIGNAL {0x3E, 0xDA ,0x09, 0x1C, 0x00, 0xB0, 0x03, 0x00, 0x03, 0x00, 0x03}
 //'Private VMSG_DL_ZONECUSTOM {0x3E, 0xA0, 0x1A, 0x50, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00] '0x3F
 //
 //' ### PowerMaster download/config items ###
@@ -232,6 +233,12 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
             unsigned char buff[] = {0x3E, 0x00, 0x19, 0x00, 0x02, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00};
             return queueCommand(buff, sizeof(buff), "Pmax_DL_ZONESTR", 0x3F);
         }
+
+   case Pmax_DL_ZONESIGNAL:
+       {
+            unsigned char buff[] = {0x3E, 0xDA, 0x09, 0x1C /*this might be the zone count*/, 0x00, 0xB0, 0x03, 0x00, 0x03, 0x00, 0x03};
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_ZONESIGNAL", 0x3F);
+       }
 
    case Pmax_DL_GET:
         {
@@ -583,7 +590,7 @@ void PowerMaxAlarm::powerLinkEnrolled()
    //    Endif
    //Endif
 
-   //Request all other relevant information
+   //Request all other relevant information (this includes zone signal strength)
    sendCommand(Pmax_DL_GET);
 
    //' We are done, exit download mode
@@ -932,22 +939,20 @@ void PowerMaxAlarm::processSettings()
         const int readCnt = readMemoryMap(msg, readBuff, sizeof(readBuff));
         for(int iCnt=0; iCnt<4; iCnt++)
         {
+            memset(m_cfg.phone[iCnt], 0, sizeof(m_cfg.phone[iCnt]));
             for(int jCnt=0; jCnt<=7; jCnt++)
             {
                 if(readBuff[8 * iCnt + jCnt] != 0xFF)
                 {
                     char szTwoDigits[10] = "";
                     sprintf(szTwoDigits, "%02X", readBuff[8 * iCnt + jCnt]);
-                    if(szTwoDigits[1] == 'F')
-                    {
-                        szTwoDigits[1] = '\0';
-                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
-                        break;
-                    }
-                    else
-                    {
-                        os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
-                    }
+                    os_strncat_s(m_cfg.phone[iCnt], sizeof(m_cfg.phone[iCnt]), szTwoDigits);
+                }
+
+                char* pEnd = strchr(m_cfg.phone[iCnt], 'F');
+                if(pEnd != NULL)
+                {
+                    *pEnd = '\0';
                 }
             }
         }
@@ -1007,6 +1012,9 @@ void PowerMaxAlarm::processSettings()
         {
             int zoneNameIdxCnt = 0;
             unsigned char zoneNamesIndexes[30] = {0};
+
+            unsigned char zoneSignal[30];
+            memset(zoneSignal, 0xFF, sizeof(zoneSignal));
             
             if(m_bPowerMaster)
             {
@@ -1026,7 +1034,17 @@ void PowerMaxAlarm::processSettings()
                 }
             }
             
+            {
+                const unsigned char msgSig[] = VMSG_DL_ZONESIGNAL;
+                int zoneCnt = readMemoryMap(msgSig, zoneSignal, sizeof(zoneSignal));
+                if(zoneCnt == 0)
+                {
+                    DEBUG(LOG_WARNING,"ERROR: Failed to read zone signal strength");
+                }
+            }
+
             strcpy(zone[0].name, "System"); //we enumerate from 1, zone 0 is not used (system)
+            zone[0].signalStrength = 0xFF;
             for(int iCnt=1; iCnt<=m_cfg.maxZoneCnt;  iCnt++)
             {
                 if(iCnt > MAX_ZONE_COUNT)
@@ -1062,6 +1080,15 @@ void PowerMaxAlarm::processSettings()
                     strcpy(pZone->name, "Unknown");
                 }
                 
+                if(iCnt-1 < sizeof(zoneSignal))
+                {
+                    pZone->signalStrength = zoneSignal[iCnt-1];
+                }
+                else
+                {
+                    pZone->signalStrength = 0xFF;
+                }
+
                 if(m_bPowerMaster)
                 {
                     //IZIZTODO
@@ -1742,6 +1769,7 @@ void Zone::DumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("sensorId", sensorId);
         outputStream->writeJsonTag("sensorType", sensorType);
         outputStream->writeJsonTag("sensorMake", sensorMake);
+        outputStream->writeJsonTag("signalStrength", (int)signalStrength);
         
         if(lastEventTime > 0)
         {

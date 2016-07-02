@@ -33,7 +33,8 @@ enum PmaxCommand
     Pmax_DL_EXIT, //stop download mode
     Pmax_DL_PANELFW,
     Pmax_DL_SERIAL,
-    Pmax_DL_ZONESTR
+    Pmax_DL_ZONESTR,
+    Pmax_DL_ZONESIGNAL //signal strength for zones
 };
 
 enum ZoneEvent
@@ -132,6 +133,7 @@ struct Zone {
     unsigned char sensorId;
     const char* sensorType;
     const char* sensorMake;
+    unsigned char signalStrength; //0 - bad, 1 - poor, 2 - good, 3 - strong, 0xFF unknown
 
     ZoneState stat;      //basic state of the zone
 
