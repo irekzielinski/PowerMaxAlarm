@@ -281,6 +281,10 @@ void LogBuffer(const char* prefix, const unsigned char* buffer, int bufferLen)
         {
             strcpy_s(szId, sizeof(szId), " [Pmax_DL_ZONESTR]");
         }
+        else if(buffer[1] == 0x3E && buffer[4] == 0x1C)
+        {
+            strcpy_s(szId, sizeof(szId), " [Pmax_DL_ZONESIGNAL]");
+        }
         else if(buffer[1] == 0xAB && buffer[2] == 0x06)
         {
             strcpy_s(szId, sizeof(szId), " [RESTORE]");
