@@ -4,7 +4,7 @@
 #include <cctype>
 
 #define IMPEMENT_GET_FUNCTION(tblName)\
-const char* GetStr##tblName(int index)\
+const char* PowerMaxAlarm::GetStr##tblName(int index)\
 {\
     int nameCnt = sizeof(tblName)/sizeof(tblName[0]);\
     if(index < nameCnt)\
@@ -333,20 +333,20 @@ const char* SystemStateFlags[] = {
 };
 
 const char*  PmaxLogEvents[] = {            
-    "None"                                      ,
-    "Interior Alarm"                            ,
-    "Perimeter Alarm"                           ,
-    "Delay Alarm"                               ,
-    "24h Silent Alarm"                          ,
-    "24h Audible Alarm"                         ,
-    "Tamper"                                    ,
-    "Control Panel Tamper"                      ,
-    "Tamper Alarm"                              ,
-    "Tamper Alarm"                              ,
-    "Communication Loss"                        ,
-    "Panic From Keyfob"                         ,
-    "Panic From Control Panel"                  ,
-    "Duress"                                    ,
+    "None"                                      , //0
+    "Interior Alarm"                            , //1
+    "Perimeter Alarm"                           , //2
+    "Delay Alarm"                               , //3
+    "24h Silent Alarm"                          , //4
+    "24h Audible Alarm"                         , //5
+    "Tamper"                                    , //6
+    "Control Panel Tamper"                      , //7
+    "Tamper Alarm"                              , //8
+    "Tamper Alarm"                              , //9
+    "Communication Loss"                        , //10
+    "Panic From Keyfob"                         , //11
+    "Panic From Control Panel"                  , //12
+    "Duress"                                    , //13
     "Confirm Alarm"                             ,
     "General Trouble"                           ,
     "General Trouble Restore"                   ,
@@ -489,12 +489,24 @@ const char*  PmaxZoneTypes[] = {
 	   "24 Hours Silent", "24 Hours Audible", "Fire", "Interior", "Home Delay", "Temperature", "Outdoor", "16"          
 };
 
+const char* PmaxEventSource[] = {
+    "System", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Zone 6", "Zone 7", "Zone 8",
+    "Zone 09", "Zone 10", "Zone 11", "Zone 12", "Zone 13", "Zone 14", "Zone 15", "Zone 16", "Zone 17", "Zone 18",
+    "Zone 19", "Zone 20", "Zone 21", "Zone 22", "Zone 23", "Zone 24", "Zone 25", "Zone 26", "Zone 27", "Zone 28", 
+    "Zone 29", "Zone 30", "Fob 1" /*31, 0x1F*/, "Fob 2", "Fob 3", "Fob 4", "Fob 5", "Fob 6", "Fob 7", "Fob 8" /*38, 0x26*/, 
+    "User 1", "User 2", "User 3", "User 4", "User 5", "User 6", "User 7", "User 8", "Pad 1", "Pad 2",
+    "Pad 3", "Pad 4", "Pad 5", "Pad 6", "Pad 7", "Pad 8", "Sir 1", "Sir 2", "2Pad 1", "2Pad 2",
+    "2Pad 3", "2Pad 4", "X10 1", "X10 2", "X10 3", "X10 4", "X10 5", "X10 6", "X10 7", "X10 8",
+    "X10 9", "X10 10", "X10 11", "X10 12", "X10 13", "X10 14", "X10 15", "PGM", "GSM", "P-LINK",
+    "PTag 1", "PTag 2", "PTag 3", "PTag 4", "PTag 5", "PTag 6", "PTag 7", "PTag 8" };
+
 IMPEMENT_GET_FUNCTION(PmaxSystemStatus);
 IMPEMENT_GET_FUNCTION(SystemStateFlags);
 IMPEMENT_GET_FUNCTION(PmaxZoneEventTypes);
 IMPEMENT_GET_FUNCTION(PmaxLogEvents);
 IMPEMENT_GET_FUNCTION(PmaxPanelType);
 IMPEMENT_GET_FUNCTION(PmaxZoneTypes);
+IMPEMENT_GET_FUNCTION(PmaxEventSource);
 
 void PowerMaxAlarm::init() {
 
@@ -509,6 +521,8 @@ void PowerMaxAlarm::init() {
     
     flags = 0;
     stat  = SS_Not_Ready;
+    alarmState = 0; //no alarm
+    memset(alarmTrippedZones, 0, sizeof(alarmTrippedZones));
     lastIoTime = 0;
 
     memset(zone, 0, sizeof(zone));
@@ -1254,27 +1268,47 @@ void PowerMaxAlarm::OnStatusUpdate(const PlinkBuffer  * Buff)
     DEBUG(LOG_INFO,"pmax status update")   ;
 }
 
-//0xA7 message, called when system is armed/disarmed
+//0xA7 message, called when system is armed/disarmed or alarm is started/cancelled
 void PowerMaxAlarm::OnStatusChange(const PlinkBuffer  * Buff)
 {
     this->sendCommand(Pmax_ACK);
-    DEBUG(LOG_INFO,"PmaxStatusChange: %s", GetStrPmaxLogEvents(Buff->buffer[4])); 
+    DEBUG(LOG_INFO,"PmaxStatusChange: '%s' by '%s'(0x%X)", GetStrPmaxLogEvents(Buff->buffer[4]), GetStrPmaxEventSource(Buff->buffer[3]), Buff->buffer[3]); 
 
     switch(Buff->buffer[4])
     {
     case 0x51: //"Arm Home" 
     case 0x53: //"Quick Arm Home"
         this->stat = SS_Armed_Home;
+        memset(alarmTrippedZones, 0, sizeof(alarmTrippedZones));
+        OnSytemArmed(Buff->buffer[4], GetStrPmaxLogEvents(Buff->buffer[4]), Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
         break;
 
     case 0x52: //"Arm Away"
     case 0x54: //"Quick Arm Away"
         this->stat = SS_Armed_Away;
+        memset(alarmTrippedZones, 0, sizeof(alarmTrippedZones));
+        OnSytemArmed(Buff->buffer[4], GetStrPmaxLogEvents(Buff->buffer[4]), Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
         break;
 
     case 0x55: //"Disarm"
         this->stat = SS_Disarm;
+        OnSytemDisarmed(Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
         break;
+
+    case 0x1B: //Cancel Alarm
+        this->alarmState = 0;
+        OnAlarmCancelled(Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
+        break;
+    }
+
+    if(Buff->buffer[4] > 0 && 
+       Buff->buffer[4] <= 9) //see first 9 values from PmaxLogEvents
+    {
+        //alarm activated:
+        //note: delay-alarm will not be delivered as OnStatusChange
+
+        this->alarmState = Buff->buffer[4];
+        OnAlarmStarted(Buff->buffer[4], GetStrPmaxLogEvents(Buff->buffer[4]), Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
     }
 }
 
@@ -1413,6 +1447,33 @@ void PowerMaxAlarm::OnStatusUpdatePanel(const PlinkBuffer  * Buff)
             case ZE_TamperRestore:
             case ZE_SirenTamperRestore:
                 this->zone[zoneId].stat.tamper = false;
+                break;
+
+            case ZE_Violated:
+                if(this->isAlarmEvent())
+                {
+                    if(this->stat == SS_Armed_Home && this->zone[zoneId].zoneType == 12 /* interior */)
+                    {
+                        //do nothing
+                    }
+                    else if(this->stat == SS_Armed_Away || this->stat == SS_Armed_Home)
+                    {
+                        //we have a zone violation in armed state
+                        if(this->zone[zoneId].enrolled &&
+                           this->zone[zoneId].stat.bypased == false)
+                        {
+                            //let's find an empty slot, and write current zone id, we don't skip duplicates as this will allow to see how atacker was moving around property
+                            for(int ix=0; ix<MAX_ZONE_COUNT; ix++)
+                            {
+                                if(this->alarmTrippedZones[ix] == 0)
+                                {
+                                    this->alarmTrippedZones[ix] = zoneId;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
                 break;
 
             default:
@@ -1718,6 +1779,29 @@ void PowerMaxAlarm::dumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("panelType", m_iPanelType);
         outputStream->writeJsonTag("panelTypeStr", GetStrPmaxPanelType(m_iPanelType));
         outputStream->writeJsonTag("panelModelType", m_iModelType);
+        outputStream->writeJsonTag("alarmState", alarmState);
+        outputStream->writeJsonTag("alarmStateStr", GetStrPmaxLogEvents(alarmState));        
+
+        outputStream->write("\"alarmTrippedZones\":[");
+        {
+            for(int ix=0; ix<MAX_ZONE_COUNT; ix++)
+            {
+                if(alarmTrippedZones[ix] == 0)
+                {
+                    break;
+                }
+
+                if(ix >0)
+                {
+                    outputStream->write(",\r\n");
+                }
+                
+                char zoneId[10] = "";
+                sprintf(zoneId, "%d", ix);
+                outputStream->write(zoneId);
+            }
+        }
+        outputStream->write("],\r\n");
 
         if(m_cfg.parsedOK)
         {
@@ -1734,7 +1818,7 @@ void PowerMaxAlarm::dumpToJson(IOutput* outputStream)
         outputStream->writeJsonTag("flags.last10sec", isFlagSet(4));
         outputStream->writeJsonTag("flags.zoneEvent", isFlagSet(5));
         outputStream->writeJsonTag("flags.armDisarmEvent", isFlagSet(6));
-        outputStream->writeJsonTag("flags.alarm", isFlagSet(7));
+        outputStream->writeJsonTag("flags.alarmEvent", isFlagSet(7));
 
         outputStream->write("\"enroled_zones\":[");
         {

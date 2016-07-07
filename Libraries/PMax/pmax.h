@@ -218,6 +218,12 @@ protected:
     //overall system status
     SystemStatus stat;
 
+    //specifies if system is in alarm mode (this is value from 0 to 9 that match first values from PmaxLogEvents)
+    unsigned char alarmState;
+
+    //this is helpful to detect if alarm is real or false, will contain list of zones that were tripped during last alarm
+    unsigned char alarmTrippedZones[MAX_ZONE_COUNT]; 
+
     //status of all zones (0 is not used, system)
     Zone zone[MAX_ZONE_COUNT];
 
@@ -263,7 +269,10 @@ public:
     void IZIZTODO_testMap();
 #endif
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //those are 'RAW' handlers for alarm messages
     //override thise function in derived class to handle notifications
+    //some of those will generate further events that you can also override
     virtual void OnStatusUpdateZoneBat(const PlinkBuffer  * Buff);
     virtual void OnStatusUpdatePanel(const PlinkBuffer  * Buff);
     virtual void OnStatusUpdateZoneBypassed(const PlinkBuffer  * Buff);
@@ -280,6 +289,44 @@ public:
     virtual void OnPanelInfo(const PlinkBuffer  * Buff);
     virtual void OnDownloadInfo(const PlinkBuffer  * Buff);
     virtual void OnDownloadSettings(const PlinkBuffer  * Buff);
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //those events are generated in 'RAW' On... handlers defined above, the only reason for those is to simplify common tasks
+
+    //Fired when system enters armed state
+    //armType     : 0x51 = "Arm Home", 0x53 = "Quick Arm Home", 0x52 = "Arm Away", 0x54 = "Quick Arm Away"
+    //armTypeStr  : text representation of arming method
+    //whoArmed    : specifies who armed system (for example a keyfob 1), values from PmaxEventSource
+    //whoArmedStr : text representation of who armed
+    virtual void OnSytemArmed(unsigned char armType, const char* armTypeStr, unsigned char whoArmed, const char* whoArmedStr){};
+
+    //Fired when system enters disarmed state
+    //whoDisarmed    : specifies who disarmed system (for example a keyfob 1), values from PmaxEventSource
+    //whoDisarmedStr : text representation of who disarmed
+    virtual void OnSytemDisarmed(unsigned char whoDisarmed, const char* whoDisarmedStr){};
+
+    //Fired when system enters alarm state
+    //alarmType      : type of alarm, first 9 values from PmaxLogEvents
+    //alarmTypeStr   : text representation of alarmType
+    //zoneTripped    : specifies zone that initiated the alarm, values from PmaxEventSource
+    //zoneTrippedStr : zone name
+    virtual void OnAlarmStarted(unsigned char alarmType, const char* alarmTypeStr, unsigned char zoneTripped, const char* zoneTrippedStr){};
+
+    //Fired when alarm is cancelled
+    //whoDisarmed    : specifies who cancelled the alarm (for example a keyfob 1), values from PmaxEventSource
+    //whoDisarmedStr : text representation of who disarmed
+    virtual void OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr){};
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //those functions provide string representation of various types in alarm, you can override to provide your own text
+    virtual const char* GetStrPmaxSystemStatus(int index);
+    virtual const char* GetStrSystemStateFlags(int index);
+    virtual const char* GetStrPmaxZoneEventTypes(int index);
+    virtual const char* GetStrPmaxLogEvents(int index);
+    virtual const char* GetStrPmaxPanelType(int index);
+    virtual const char* GetStrPmaxZoneTypes(int index);
+    virtual const char* GetStrPmaxEventSource(int index);
 
 protected:
     void addPin(unsigned char* bufferToSend, int pos = 4, bool useMasterCode = false);
