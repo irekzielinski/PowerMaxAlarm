@@ -96,6 +96,12 @@ Private VMSG_PMASTER_STAT1 {&HB0, &H01, &H04, &H06, &H02, &HFF, &H08, &H03, &H00
 #define VCFG_WIRED {2, 2, 2, 2, 2, 2, 1, 1, 2}
 #define VCFG_ZONECUSTOM {0, 5, 5, 5, 5, 5, 5, 5, 5}
 
+bool PowerMaxAlarm::setDateTime(unsigned char year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minutes, unsigned char seconds)
+{
+    unsigned char buff[] = {0x46,0xF8,0x00,seconds,minutes,hour,day,month,year,0xFF,0xFF};
+    return queueCommand(buff, sizeof(buff), "SET_DATE_TIME", 0xA0);
+}
+
 bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
 {
     switch(cmd)
@@ -607,11 +613,15 @@ void PowerMaxAlarm::powerLinkEnrolled()
    //Request all other relevant information (this includes zone signal strength)
    sendCommand(Pmax_DL_GET);
 
+   //' auto-sync date/time
+   unsigned char year, month, day, hour, minutes, seconds;
+   if(os_getLocalTime(year, month, day, hour, minutes, seconds))
+   {
+       setDateTime(year, month, day, hour, minutes, seconds);
+   }
+
    //' We are done, exit download mode
    sendCommand(Pmax_DL_EXIT);
-
-   //' auto-sync date/time
-   //SendMsg_SetDateTime()
 
     //Lets request the eventlogs
     if(m_bPowerMaster == false)

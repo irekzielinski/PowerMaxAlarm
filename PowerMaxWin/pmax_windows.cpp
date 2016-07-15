@@ -245,6 +245,10 @@ void LogBuffer(const char* prefix, const unsigned char* buffer, int bufferLen)
         {
             strcpy_s(szId, sizeof(szId), " [ACCESS DENIED]");
         }
+        else if(buffer[1] == 0x46)
+        {
+            strcpy_s(szId, sizeof(szId), " [TIME AND DATE]");
+        }
         else if(buffer[1] == 0x06)
         {
             strcpy_s(szId, sizeof(szId), " [TIME OUT]");
@@ -532,6 +536,20 @@ bool os_pmComPortInit(const char* portName)
 int os_cfg_getPacketTimeout()
 {
     return PACKET_TIMEOUT_DEFINED;
+}
+
+//see PowerMaxAlarm::setDateTime for details of the parameters, if your OS does not have a RTC clock, simply return false
+bool os_getLocalTime(unsigned char& year, unsigned char& month, unsigned char& day, unsigned char& hour, unsigned char& minutes, unsigned char& seconds)
+{
+    SYSTEMTIME tm;
+    GetLocalTime(&tm);
+    year    = (unsigned char)( tm.wYear - 2000 );
+    month   = (unsigned char)tm.wMonth;
+    day     = (unsigned char)tm.wDay;
+    hour    = (unsigned char)tm.wHour;
+    minutes = (unsigned char)tm.wMinute;
+    seconds = (unsigned char)tm.wSecond;
+    return true;
 }
 
 /////////////////////////

@@ -257,6 +257,13 @@ public:
     bool sendCommand(PmaxCommand cmd);
     void handlePacket(PlinkBuffer  * commandBuffer);
    
+    //hours must be specified in 24 hour format
+    //day must be the day of the month (1-31)
+    //month must be between 1-12
+    //year must be specified as the years since 2000.
+    //note: works only in programming (donload) mode.
+    bool setDateTime(unsigned char year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minutes, unsigned char seconds);
+
     static bool isBufferOK(const PlinkBuffer* commandBuffer);
     const char* getZoneName(unsigned char zoneId);
 
@@ -381,5 +388,8 @@ int os_cfg_getPacketTimeout();
 
 void os_debugLog(int priority, bool raw, const char *function, int line,const char *format, ...);
 void os_strncat_s(char* dst, int dst_size, const char* src);
+
+//see PowerMaxAlarm::setDateTime for details of the parameters, if your OS does not have a RTC clock, simply return false
+bool os_getLocalTime(unsigned char& year, unsigned char& month, unsigned char& day, unsigned char& hour, unsigned char& minutes, unsigned char& seconds);
 
 unsigned long os_getCurrentTimeSec();
