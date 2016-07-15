@@ -1811,14 +1811,14 @@ void PowerMaxAlarm::dumpToJson(IOutput* outputStream)
         }
 
         outputStream->writeJsonTag("flags", flags);
-        outputStream->writeJsonTag("flags.ready", isFlagSet(0));
-        outputStream->writeJsonTag("flags.alertInMemory", isFlagSet(1));
-        outputStream->writeJsonTag("flags.trouble", isFlagSet(2));
-        outputStream->writeJsonTag("flags.bypasOn", isFlagSet(3));
-        outputStream->writeJsonTag("flags.last10sec", isFlagSet(4));
-        outputStream->writeJsonTag("flags.zoneEvent", isFlagSet(5));
-        outputStream->writeJsonTag("flags.armDisarmEvent", isFlagSet(6));
-        outputStream->writeJsonTag("flags.alarmEvent", isFlagSet(7));
+        outputStream->writeJsonTag("flags_ready", isFlagSet(0));
+        outputStream->writeJsonTag("flags_alertInMemory", isFlagSet(1));
+        outputStream->writeJsonTag("flags_trouble", isFlagSet(2));
+        outputStream->writeJsonTag("flags_bypasOn", isFlagSet(3));
+        outputStream->writeJsonTag("flags_last10sec", isFlagSet(4));
+        outputStream->writeJsonTag("flags_zoneEvent", isFlagSet(5));
+        outputStream->writeJsonTag("flags_armDisarmEvent", isFlagSet(6));
+        outputStream->writeJsonTag("flags_alarmEvent", isFlagSet(7));
 
         outputStream->write("\"enroled_zones\":[");
         {
@@ -1861,11 +1861,11 @@ void Zone::DumpToJson(IOutput* outputStream)
             outputStream->writeJsonTag("lastEventAge", (int)(os_getCurrentTimeSec()-lastEventTime));
         }
 
-        outputStream->writeJsonTag("stat.doorOpen", stat.doorOpen);
-        outputStream->writeJsonTag("stat.bypased", stat.bypased);
-        outputStream->writeJsonTag("stat.lowBattery", stat.lowBattery);
-        outputStream->writeJsonTag("stat.active", stat.active);
-        outputStream->writeJsonTag("stat.tamper", stat.tamper, false);
+        outputStream->writeJsonTag("stat_doorOpen", stat.doorOpen);
+        outputStream->writeJsonTag("stat_bypased", stat.bypased);
+        outputStream->writeJsonTag("stat_lowBattery", stat.lowBattery);
+        outputStream->writeJsonTag("stat_active", stat.active);
+        outputStream->writeJsonTag("stat_tamper", stat.tamper, false);
     }
     outputStream->write("}");
 }
