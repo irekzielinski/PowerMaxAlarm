@@ -253,6 +253,27 @@ public:
     }
 };
 
+BOOL WriteAllBytes(HANDLE hHandle, const unsigned char* buff, int bytesToWrite, DWORD* totalWritten)
+{
+    *totalWritten = 0;
+    while(bytesToWrite > 0)
+    {
+        DWORD dwWritten = 0;
+        if(WriteFile(hHandle, buff, bytesToWrite, &dwWritten, NULL) == FALSE)
+        {
+            return FALSE;
+        }
+
+        bytesToWrite -= dwWritten;
+        buff += dwWritten;
+        *totalWritten += dwWritten;
+
+        Sleep(10);
+    }
+
+    return TRUE;
+}
+
 //This can be used to connect PowerMaster Remote Controler application (provided for free by Visonic) to the alarm via ESP8266
 //You need to install Com0com driver first (it's available on the internet).
 //Com0com creates a PAIR of connected COM ports (for example COM6 <-> COM7), select one (for example COM6) in this application.
@@ -332,7 +353,7 @@ bool RedirectPowerMaxToComPort(const char* destPort)
         {
             DWORD dwWritten = 0;
             LogBuffer("PM", buffer, read);
-            if(WriteFile(localComPort, buffer, read, &dwWritten, NULL) == FALSE)
+            if(WriteAllBytes(localComPort, buffer, read, &dwWritten) == FALSE)
             {
                 break;
             }
