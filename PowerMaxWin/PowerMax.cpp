@@ -251,6 +251,11 @@ public:
             break;
         }        
     }
+
+    virtual void OnPanelDateTime(unsigned char year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minutes, unsigned char seconds)
+    {
+        printf("Date/time of panel: %d/%02d/%02d %02d:%02d:%02d\r\n", year+2000, month, day, hour, minutes, seconds);
+    }
 };
 
 BOOL WriteAllBytes(HANDLE hHandle, const unsigned char* buff, int bytesToWrite, DWORD* totalWritten)

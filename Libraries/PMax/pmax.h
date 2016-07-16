@@ -256,12 +256,12 @@ public:
     
     bool sendCommand(PmaxCommand cmd);
     void handlePacket(PlinkBuffer  * commandBuffer);
-   
-    //hours must be specified in 24 hour format
-    //day must be the day of the month (1-31)
-    //month must be between 1-12
-    //year must be specified as the years since 2000.
-    //note: works only in programming (donload) mode.
+    
+    //Sets the date and time of the panel (works only in programming (download) mode)
+    //year  : must be specified as the years since 2000
+    //month : must be between 1-12
+    //day   : must be the day of the month (1-31)
+    //hours : must be in 24 hour format
     bool setDateTime(unsigned char year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minutes, unsigned char seconds);
 
     static bool isBufferOK(const PlinkBuffer* commandBuffer);
@@ -324,6 +324,9 @@ public:
     //whoDisarmedStr : text representation of who disarmed
     virtual void OnAlarmCancelled(unsigned char whoDisarmed, const char* whoDisarmedStr){};
 
+    //Fired when date and time is downloaded from the panel (can be used for example to compare date against external source, and reset it using setDateTime if it's not accurate)
+    //parameters     : see setDateTime function
+    virtual void OnPanelDateTime(unsigned char year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minutes, unsigned char seconds){};
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //those functions provide string representation of various types in alarm, you can override to provide your own text
