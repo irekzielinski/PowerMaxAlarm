@@ -608,4 +608,10 @@ int os_cfg_getPacketTimeout()
 {
     return PACKET_TIMEOUT_DEFINED;
 }
+
+//see PowerMaxAlarm::setDateTime for details of the parameters, if your OS does not have a RTC clock, simply return false
+bool os_getLocalTime(unsigned char& year, unsigned char& month, unsigned char& day, unsigned char& hour, unsigned char& minutes, unsigned char& seconds)
+{
+    return false; //IZIZTODO
+}
 //////End of OS specific part of PM library/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
