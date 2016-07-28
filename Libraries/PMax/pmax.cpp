@@ -1790,6 +1790,8 @@ void PowerMaxAlarm::dumpToJson(IOutput* outputStream)
 {
     outputStream->write("{");
     {
+        OnDumpToJsonStarted(outputStream);
+
         outputStream->writeJsonTag("stat", stat);
         outputStream->writeJsonTag("stat_str", GetStrPmaxSystemStatus(stat));
         outputStream->writeJsonTag("lastCom", (int)getSecondsFromLastComm());

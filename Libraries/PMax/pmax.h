@@ -328,6 +328,9 @@ public:
     //parameters     : see setDateTime function
     virtual void OnPanelDateTime(unsigned char year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minutes, unsigned char seconds){};
 
+    //Allows to add extra fields to json output
+    virtual void OnDumpToJsonStarted(IOutput* outputStream){};
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //those functions provide string representation of various types in alarm, you can override to provide your own text
     virtual const char* GetStrPmaxSystemStatus(int index);
@@ -338,6 +341,7 @@ public:
     virtual const char* GetStrPmaxZoneTypes(int index);
     virtual const char* GetStrPmaxEventSource(int index);
 
+    SystemStatus GetSystemStatus() const { return stat;} 
 protected:
     void addPin(unsigned char* bufferToSend, int pos = 4, bool useMasterCode = false);
 
