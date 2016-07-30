@@ -370,8 +370,6 @@ int tcp_pmComPortRead(void* readBuff, int bytesToRead)
 
 int tcp_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
-   LogBuffer("PC", (const unsigned char*)dataToWrite, bytesToWrite);
-
    int totalSent = 0;
     while( bytesToWrite > 0 ){
         int written = send(s, (char*)dataToWrite, bytesToWrite, 0);
@@ -401,9 +399,6 @@ bool tcp_pmComPortClose()
 }
 
 bool tcp_pmComPortInit(const char* portName) {
- 
-    hLogFile = CreateFile(L"comms.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    SetFilePointer(hLogFile, 0, 0, FILE_END);
 
     int PortNo = 23;
     const char* IPAddress = portName;
@@ -498,6 +493,8 @@ int os_pmComPortRead(void* readBuff, int bytesToRead)
 
 int os_pmComPortWrite(const void* dataToWrite, int bytesToWrite)
 {
+    LogBuffer("PC", (const unsigned char*)dataToWrite, bytesToWrite);
+
     if(g_useComPort)
     {
         return com_pmComPortWrite(dataToWrite, bytesToWrite);
@@ -522,6 +519,9 @@ bool os_pmComPortClose()
 
 bool os_pmComPortInit(const char* portName)
 {
+    hLogFile = CreateFile(L"comms.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    SetFilePointer(hLogFile, 0, 0, FILE_END);
+
     if(g_useComPort)
     {
         return com_pmComPortInit(portName);
