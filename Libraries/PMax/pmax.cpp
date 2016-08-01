@@ -298,8 +298,8 @@ struct PlinkCommand PmaxCommand[] =
     {{0xA7,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Panel status change"        ,&PowerMaxAlarm::OnStatusChange},
     {{0xAB,0x0A,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x43},12 ,"Enroll request"             ,&PowerMaxAlarm::OnEnroll},
     {{0xAB,0x03,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x43},12 ,"Ping"                       ,&PowerMaxAlarm::OnPing},
-    {{0x3C,0xFD,0x0A,0x00,0x00,0x0E,0x05,0x01,0x00,0x00,0x00     },11, "Panel Info"                 ,&PowerMaxAlarm::OnPanelInfo},
-    {{0x3F,0xFF,0xFF,0xFF                                        },-4, "Download Info"              ,&PowerMaxAlarm::OnDownloadInfo}, //-4 means: size>=4, len can differ
+    {{0x3C,0xFD,0x0A,0x00,0x00,0xFF,0xFF,0xFF,0xFF               },-9, "Panel Info"                 ,&PowerMaxAlarm::OnPanelInfo},    // -9 means: size>=9, len can differ
+    {{0x3F,0xFF,0xFF,0xFF                                        },-4, "Download Info"              ,&PowerMaxAlarm::OnDownloadInfo}, // -4 means: size>=4, len can differ
     {{0x33,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF     },11, "Download Settings"          ,&PowerMaxAlarm::OnDownloadSettings},
     {{0x02,0x43                                                  },2  ,"Acknowledgement"            ,&PowerMaxAlarm::OnAck},
     {{0x02,                                                      },1  ,"Acknowledgement 2"          ,&PowerMaxAlarm::OnAck},
@@ -480,7 +480,7 @@ const char*  PmaxPanelType[] = {
     "PowerMax+"              ,
     "PowerMax Pro"           ,
     "PowerMax Complete"      ,
-    "PowerMax Pro Part"      ,
+    "PowerMax Pro Part"      , //"part" stands for "partition support", this unit supports multiple partitions
     "PowerMax Complete Part" ,
     "PowerMax Express"       ,
     "PowerMaster10"          ,
