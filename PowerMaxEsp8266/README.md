@@ -1,4 +1,4 @@
-# Installation procedure.
+# Compilation and flashing procedure.
 
 * Sketch is using a PMAX library that needs to be at the same location as the directory structure in Github:
     * c:\yourArduinoFolder**\Libraries\PMax**
