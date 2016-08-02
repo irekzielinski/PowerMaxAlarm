@@ -350,22 +350,22 @@ const char*  PmaxLogEvents[] = {
     "Panic From Keyfob"                         , //11
     "Panic From Control Panel"                  , //12
     "Duress"                                    , //13
-    "Confirm Alarm"                             ,
-    "General Trouble"                           ,
-    "General Trouble Restore"                   ,
-    "Interior Restore"                          ,
-    "Perimeter Restore"                         ,
-    "Delay Restore"                             ,
-    "24h Silent Restore"                        ,
-    "24h Audible Restore"                       ,
-    "Tamper Restore"                            ,
-    "Control Panel Tamper Restore"              ,
-    "Tamper Restore"                            ,
-    "Tamper Restore"                            ,
-    "Communication Restore"                     ,
-    "Cancel Alarm"                              ,
-    "General Restore"                           ,
-    "Trouble Restore"                           ,
+    "Confirm Alarm"                             , //14
+    "General Trouble"                           , //15
+    "General Trouble Restore"                   , //16
+    "Interior Restore"                          , //17
+    "Perimeter Restore"                         , //18
+    "Delay Restore"                             , //19
+    "24h Silent Restore"                        , //20
+    "24h Audible Restore"                       , //21
+    "Tamper Restore"                            , //22
+    "Control Panel Tamper Restore"              , //23
+    "Tamper Restore"                            , //24
+    "Tamper Restore"                            , //25
+    "Communication Restore"                     , //26
+    "Cancel Alarm"                              , //27
+    "General Restore"                           , //28
+    "Trouble Restore"                           , //29
     "Not used"                                  ,
     "Recent Close"                              ,
     "Fire"                                      ,
@@ -1216,6 +1216,17 @@ void PowerMaxAlarm::processSettings()
 
 void PowerMaxAlarm::OnAck(const PlinkBuffer  * Buff)
 {
+    //TODO: confitm this with Bart, 
+    //if this does not work, maybe on PM+ we don't need to call Init() at all?
+    if(this->m_lastSentCommand.size == 12 && 
+        this->m_lastSentCommand.buffer[0] == 0xAB &&
+        this->m_lastSentCommand.buffer[1] == 0x0A &&
+        this->m_lastSentCommand.buffer[3] == 0x01)
+    {
+        //we got an ack for Pmax_INIT command, this on PowerMax+ can take some time, we need to pause execution before issuing any new commands
+        os_usleep(1 * 1000000); //sleep for 1 second
+    }
+
     if(this->m_lastSentCommand.size == 1 &&
        this->m_lastSentCommand.buffer[0] == 0x0F) //Pmax_DL_EXIT
     {
@@ -1312,9 +1323,22 @@ void PowerMaxAlarm::OnStatusChange(const PlinkBuffer  * Buff)
         OnSytemDisarmed(Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
         break;
 
-    case 0x1B: //Cancel Alarm
+    case 0x58: //"Exit From Test Mode"
+        //TODO: this should trigger refresh of signal strength
+        break;
+
+    case 0x1B: //"Cancel Alarm"
         this->alarmState = 0;
         OnAlarmCancelled(Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
+        break;
+
+    case 0x1C: //"General Restore"
+        if(this->alarmState != 0)
+        {
+            //this can happen when, alarm is opended (triggering tamper alarm), after it's closed - "General Restore" is called
+            this->alarmState = 0;
+            OnAlarmCancelled(Buff->buffer[3], GetStrPmaxEventSource(Buff->buffer[3]));
+        }
         break;
     }
 
