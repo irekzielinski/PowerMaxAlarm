@@ -62,7 +62,7 @@ Getting started:
 * Connect WeMos to PowerMax RS232 port:
   ![Wemos pinout](https://github.com/irekzielinski/PowerMaxAlarm/blob/master/doc/WemosPowerMax.png?raw=true)
 * Connect 12V power from alarm to DC input in WeMos D1 (ground to the outside, 12V+ to the centre pin).
-* On PowerMax Complete that's all you need to do, on other board you might need to perform [manual powerlink enrolment](doc/Enrolment.md).
+* On PowerMax Complete that's all you need to do, on other boards you might need to perform a [manual powerlink enrolment](doc/Enrolment.md).
 * Find IP address of your ESP.
 * Connect to this IP with telnet or web browser.
 
