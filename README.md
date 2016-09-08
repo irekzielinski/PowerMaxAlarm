@@ -59,8 +59,11 @@ For this project I recommend to use WeMos D1 board (full size, not mini):
 Getting started:
 * Purchase [WeMos D1 board](http://www.wemos.cc/Products/d1_r2.html) (both revision 1 and 2 are OK)
 * Connect it first to the PC, and [flash PowerMaxEsp8266](https://github.com/irekzielinski/PowerMaxAlarm/tree/master/PowerMaxEsp8266#installation-procedure) project using Arduino IDE. Make sure to update your WiFi details on top of the sketch.
-* Connect WeMos to PowerMax RS232 port:
+* Connect WeMos to RS232 of the alarm port:
+  * Pinout for PowerMax Complete: 
   ![Wemos pinout](https://github.com/irekzielinski/PowerMaxAlarm/blob/master/doc/WemosPowerMax.png?raw=true)
+  * Pinout for PowerMax+: [see this article](http://www.domoticaforum.eu/viewtopic.php?f=68&t=6581&start=45#p63022)
+
 * Connect 12V power from alarm to DC input in WeMos D1 (ground to the outside, 12V+ to the centre pin).
 * On PowerMax Complete that's all you need to do, on other boards you might need to perform a [manual powerlink enrolment](doc/Enrolment.md).
 * Find IP address of your ESP.
