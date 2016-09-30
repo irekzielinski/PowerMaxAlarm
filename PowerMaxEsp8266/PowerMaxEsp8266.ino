@@ -88,7 +88,7 @@ void LOG(const char *format, ...)
 #ifdef PM_ENABLE_TELNET_ACCESS  
   if(telnetClient.connected())
   {
-    telnetClient.write_P(buf, strlen(buf));
+    telnetClient.write((const uint8_t *)buf, strlen(buf));
   }
 #endif  
   va_end(ap);
@@ -150,7 +150,7 @@ public:
   {
     if(bufferLen)
     {
-      c->write_P(buffer, bufferLen);
+      c->write((const uint8_t *)buffer, bufferLen);
       buffer[0] = 0;
       bufferLen = 0;
     }   
@@ -266,7 +266,7 @@ void runDirectRelayLoop()
     
     if(readCnt > 0)
     {
-      telnetClient.write_P( (char*)buffer, readCnt );
+      telnetClient.write((const uint8_t *)buffer, readCnt );
     }
 
     if(telnetClient.available())
@@ -520,10 +520,10 @@ void os_debugLog(int priority, bool raw, const char *function, int line, const c
   #ifdef PM_ENABLE_TELNET_ACCESS
     if(telnetClient.connected())
     { 
-      telnetClient.write_P(buf, strlen(buf));
+      telnetClient.write((const uint8_t *)buf, strlen(buf));
       if(raw == false)
       {
-        telnetClient.write_P("\r\n", 2);
+        telnetClient.write((const uint8_t *)"\r\n", 2);
       }    
     }
   #endif
