@@ -219,6 +219,8 @@ void setup(void){
   telnetServer.setNoDelay(true);
 #endif
 
+  //if you have a fast board (like PowerMax Complete) you can pass 0 to init function like this: pm.init(0);
+  //this will speed up the boot process, keep it as it is, if you have issues downloading the settings from the board.
   pm.init();
 }
 

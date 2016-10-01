@@ -515,7 +515,7 @@ IMPEMENT_GET_FUNCTION(PmaxPanelType);
 IMPEMENT_GET_FUNCTION(PmaxZoneTypes);
 IMPEMENT_GET_FUNCTION(PmaxEventSource);
 
-void PowerMaxAlarm::init() {
+void PowerMaxAlarm::init(int initWaitTime) {
 
     memset(&m_lastSentCommand, 0, sizeof(m_lastSentCommand));
     m_bEnrolCompleted = false;
@@ -526,7 +526,8 @@ void PowerMaxAlarm::init() {
     m_ackTypeForLastMsg = ACK_1;
     m_ulLastPing = os_getCurrentTimeSec();
     m_ulNextPingDeadline = ULONG_MAX;
-    
+    m_iInitWaitTime = initWaitTime;
+
     flags = 0;
     stat  = SS_Not_Ready;
     alarmState = 0; //no alarm
@@ -1229,21 +1230,17 @@ void PowerMaxAlarm::processSettings()
         if(readCnt >=  4) sprintf(m_cfg.masterInstallerPin, "%02X%02X", readBuff[2], readBuff[3]); 
         if(readCnt >= 10) sprintf(m_cfg.powerLinkPin,       "%02X%02X", readBuff[8], readBuff[9]); 
     }
-
-
 }
 
 void PowerMaxAlarm::OnAck(const PlinkBuffer  * Buff)
 {
-    //TODO: confitm this with Bart, 
-    //if this does not work, maybe on PM+ we don't need to call Init() at all?
     if(this->m_lastSentCommand.size == 12 && 
-        this->m_lastSentCommand.buffer[0] == 0xAB &&
-        this->m_lastSentCommand.buffer[1] == 0x0A &&
-        this->m_lastSentCommand.buffer[3] == 0x01)
+       this->m_lastSentCommand.buffer[0] == 0xAB &&
+       this->m_lastSentCommand.buffer[1] == 0x0A &&
+       this->m_lastSentCommand.buffer[3] == 0x01)
     {
         //we got an ack for Pmax_INIT command, this on PowerMax+ can take some time, we need to pause execution before issuing any new commands
-        os_usleep(1 * 1000000); //sleep for 1 second
+        os_usleep(this->m_iInitWaitTime * 1000000); //sleep for m_iInitWaitTime seconds
     }
 
     if(this->m_lastSentCommand.size == 1 &&
