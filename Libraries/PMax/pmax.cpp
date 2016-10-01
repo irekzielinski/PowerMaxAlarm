@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <cctype>
+#include <limits.h>
 
 #define IMPEMENT_GET_FUNCTION(tblName)\
 const char* PowerMaxAlarm::GetStr##tblName(int index)\
@@ -251,9 +252,6 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
 
     case Pmax_DL_START: //start download (0x3C - DownloadCode: 3 & 4)
         {
-            unsigned char buff[] = {0x24,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; addPin(buff, 3);
-            return queueCommand(buff, sizeof(buff), "Pmax_DL_START", 0x3C, "PIN:DownloadCode:3");
-
             if(m_bDownloadMode == false)
             {
                 m_bDownloadMode = true;
@@ -262,6 +260,12 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
             {
                 DEBUG(LOG_WARNING,"Already in Download Mode?");
             }
+
+            //in download mode we don't expect ping messages
+            stopKeepAliveTimer();
+
+            unsigned char buff[] = {0x24,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; addPin(buff, 3);
+            return queueCommand(buff, sizeof(buff), "Pmax_DL_START", 0x3C, "PIN:DownloadCode:3");
         }
 
     case Pmax_DL_EXIT: //stop download
@@ -521,6 +525,7 @@ void PowerMaxAlarm::init() {
     m_bPowerMaster = false;
     m_ackTypeForLastMsg = ACK_1;
     m_ulLastPing = os_getCurrentTimeSec();
+    m_ulNextPingDeadline = ULONG_MAX;
     
     flags = 0;
     stat  = SS_Not_Ready;
@@ -743,12 +748,26 @@ void PowerMaxAlarm::OnStop(const PlinkBuffer  * Buff)
 
 void PowerMaxAlarm::startKeepAliveTimer()
 {
-    //IZIZTODO:
+    m_ulNextPingDeadline = os_getCurrentTimeSec() + 180; //if we don't receive a ping in next 3 minutes we will assume comms are lost
 }
 
 void PowerMaxAlarm::stopKeepAliveTimer()
 {
-    //IZIZTODO:
+    m_ulNextPingDeadline = ULONG_MAX;
+}
+
+bool PowerMaxAlarm::restoreCommsIfLost()
+{
+    if(m_bDownloadMode == false &&
+       os_getCurrentTimeSec() > m_ulNextPingDeadline)
+    {
+        sendCommand(Pmax_RESTORE);
+        startKeepAliveTimer();
+
+        return true;
+    }
+
+    return false;
 }
 
 void PowerMaxAlarm::OnPing(const PlinkBuffer  * Buff)

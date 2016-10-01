@@ -413,18 +413,17 @@ int _tmain(int argc, _TCHAR* argv[])
                 dwLastMsg = GetTickCount();
             }
             
-            if(GetTickCount() - dwLastMsg > 300)
+            if(GetTickCount() - dwLastMsg > 300) //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
             {
                 pm.sendNextCommand();
             }
 
+            if(pm.restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
+            {
+                DEBUG(LOG_ERR,"Connection was lost, attempting to restore it.");
+            }
 
 		    os_usleep(os_cfg_getPacketTimeout());
-
-            /*if(pm.getSecondsFromLastComm() > 120)
-            {
-                pm.sendCommand(Pmax_RESTORE);
-            }*/
         }  
     }
 

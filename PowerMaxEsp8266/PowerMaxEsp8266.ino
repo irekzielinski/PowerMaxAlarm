@@ -483,10 +483,15 @@ void loop(void){
     lastMsg = millis();
   }
 
-  if(millis() - lastMsg > 300 || millis() < lastMsg)
+  if(millis() - lastMsg > 300 || millis() < lastMsg) //we ensure a small delay between commands, as it can confuse the alarm (it has a slow CPU)
   {
     pm.sendNextCommand();
   }
+
+  if(pm.restoreCommsIfLost()) //if we fail to get PINGs from the alarm - we will attempt to restore the connection
+  {
+      DEBUG(LOG_WARNING,"Connection lost. Sending RESTORE request.");   
+  }   
 
 #ifdef PM_ENABLE_TELNET_ACCESS
   handleNewTelnetClients();

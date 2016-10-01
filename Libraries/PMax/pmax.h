@@ -247,11 +247,13 @@ protected:
     MemoryMap m_mapExtended;
 
     PlinkCommand m_lastSentCommand;
-    unsigned long m_ulLastPing;
+    unsigned long m_ulLastPing; //last ping fom Pmax->Alarm
+    unsigned long m_ulNextPingDeadline; //when to expect next ping from Alarm->Pmax, if it will not arrive, we will send restore command. Pings are not expected in donwload mode
 public:
 
     void init();
     void sendNextCommand();
+    bool restoreCommsIfLost();
     void clearQueue(){ m_sendQueue.clear(); }
     
     bool sendCommand(PmaxCommand cmd);
