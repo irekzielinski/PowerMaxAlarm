@@ -138,25 +138,25 @@ bool PowerMaxAlarm::sendCommand(PmaxCommand cmd)
     case Pmax_DISARM:
         {
             unsigned char buff[] = {0xA1,0x00,0x00,0x00,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
-            return sendBuffer(buff, sizeof(buff));
+            return queueCommand(buff, sizeof(buff), "Pmax_DISARM", 0xA0, "PIN:MasterCode:4");
         }
 
     case Pmax_ARMHOME:
         {
             unsigned char buff[] = {0xA1,0x00,0x00,0x04,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
-            return sendBuffer(buff, sizeof(buff));
+            return queueCommand(buff, sizeof(buff), "Pmax_ARMHOME", 0xA0, "PIN:MasterCode:4");
         }
 
     case Pmax_ARMAWAY:
         {
             unsigned char buff[] = {0xA1,0x00,0x00,0x05,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
-            return sendBuffer(buff, sizeof(buff));
+            return queueCommand(buff, sizeof(buff), "Pmax_ARMAWAY", 0xA0, "PIN:MasterCode:4");
         }
 
     case Pmax_ARMAWAY_INSTANT:
         {
             unsigned char buff[] = {0xA1,0x00,0x00,0x14,0x12,0x34,0x00,0x00,0x00,0x00,0x00,0x43}; addPin(buff, 4, true);
-            return sendBuffer(buff, sizeof(buff));
+            return queueCommand(buff, sizeof(buff), "Pmax_ARMAWAY_INSTANT", 0xA0, "PIN:MasterCode:4");
         }
 
     case Pmax_REQSTATUS:
@@ -1098,7 +1098,7 @@ void PowerMaxAlarm::processSettings()
             zone[0].signalStrength = 0xFF;
             for(int iCnt=1; iCnt<=m_cfg.maxZoneCnt;  iCnt++)
             {
-                if(iCnt > MAX_ZONE_COUNT)
+                if(iCnt >= MAX_ZONE_COUNT)
                 {
                     DEBUG(LOG_WARNING,"ERROR: Failed to read all zones, as MAX_ZONE_COUNT is too small. Increase it to: %d", m_cfg.maxZoneCnt);
                     break;
