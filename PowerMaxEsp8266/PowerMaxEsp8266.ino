@@ -557,6 +557,7 @@ unsigned long os_getCurrentTimeSec()
     wrapCnt++;
   }
 
+  lastVal = currentVal;
   unsigned long seconds = currentVal/1000;
   
   //millis will wrap each 50 days, as we are interested only in seconds, let's keep the wrap counter
