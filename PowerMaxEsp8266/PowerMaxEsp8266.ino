@@ -428,7 +428,11 @@ bool serialHandler(PowerMaxAlarm* pm) {
   
   char oneByte = 0;  
   while (  (os_pmComPortRead(&oneByte, 1) == 1)  ) 
-  {     
+  {
+    // wait for the preamble
+    if (commandBuffer.size == 0 && oneByte != 0x0D)
+      continue;
+
     if (commandBuffer.size<(MAX_BUFFER_SIZE-1))
     {
       *(commandBuffer.size+commandBuffer.buffer) = oneByte;
